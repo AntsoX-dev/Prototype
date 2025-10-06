@@ -1,0 +1,24 @@
+import { Routes, Route, Navigate } from "react-router-dom";
+import SignIn from "./authentification/SignIn";
+import SignUp from "./authentification/SignUp";
+import MdpOublie from "./authentification/MdpOublie";
+import ResetPassword from "./authentification/reset-password";
+import VerifyEmail from "./authentification/verify-email";
+import Dashboard from "./dashboard/index";
+
+function App() {
+  return (
+    <Routes>
+      <Route path="/" element={<Navigate to="/signin" replace />} />
+      <Route path="/signin" element={<SignIn />} />
+      <Route path="/signup" element={<SignUp />} />
+      <Route path="/mdpoublie" element={<MdpOublie />} />
+      <Route path="/reset-password" element={<ResetPassword />} />
+      <Route path="/verify-email" element={<VerifyEmail />} /> 
+      <Route path="/dashboard" element={<Dashboard />} />
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
+  );
+}
+
+export default App;

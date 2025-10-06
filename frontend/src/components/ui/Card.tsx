@@ -1,0 +1,15 @@
+import React from "react";
+
+export const Card = ({ children, className }: { children: React.ReactNode; className?: string }) => (
+  <div className={`bg-white rounded-xl shadow border p-4 ${className || ""}`}>
+    {children}
+  </div>
+);
+
+export const CardHeader = ({ children }: { children: React.ReactNode }) => (
+  <div className="mb-4 border-b pb-2">{children}</div>
+);
+
+export const CardContent = ({ children }: { children: React.ReactNode }) => (
+  <div>{children}</div>
+);
