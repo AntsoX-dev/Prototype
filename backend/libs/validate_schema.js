@@ -11,8 +11,14 @@ const loginSchema = z.object({
     password: z.string().min(8, "Le mot de passe doit contenir au moins 8 caractères"),
 });
 
+const workspaceSchema = z.object({
+    name: z.string().min(1,"Le nom est requis"),
+    description: z.string().optional(),
+    color: z.string().min(1,"Une couleur est requis"),
+});
+
 const verifyEmailSchema = z.object({
     token: z.string().min(1, "Le jeton d'authentification est obligatoire")
 });
 
-export { registerSchema, loginSchema, verifyEmailSchema };
+export { registerSchema, loginSchema, verifyEmailSchema,workspaceSchema };

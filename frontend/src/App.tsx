@@ -4,6 +4,7 @@ import SignUp from "./authentification/SignUp";
 import MdpOublie from "./authentification/MdpOublie";
 import ResetPassword from "./authentification/reset-password";
 import VerifyEmail from "./authentification/verify-email";
+import DashboardLayout from "./dashboard/dashboard-layout";
 import Dashboard from "./dashboard/index";
 
 function App() {
@@ -14,8 +15,10 @@ function App() {
       <Route path="/signup" element={<SignUp />} />
       <Route path="/mdpoublie" element={<MdpOublie />} />
       <Route path="/reset-password" element={<ResetPassword />} />
-      <Route path="/verify-email" element={<VerifyEmail />} /> 
-      <Route path="/dashboard" element={<Dashboard />} />
+      <Route path="/verify-email" element={<VerifyEmail />} />
+      <Route path="/dashboard" element={<DashboardLayout />}>
+        <Route index element={<Dashboard />} />
+      </Route> 
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
