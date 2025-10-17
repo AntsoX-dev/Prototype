@@ -12,6 +12,7 @@ import { Button } from "../button";
 import { useCreateWorkspace } from "../../hooks/use-workspace";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
+import { queryClient } from "../../fournisseur/react-query"; // ✅ import ajouté
 
 interface CreateWorkspaceProps {
     isCreatingWorkspace: boolean;
@@ -52,10 +53,15 @@ export const CreateWorkspace = ({
                 form.reset();
                 setIsCreatingWorkspace(false);
                 toast.success("Espace de travail créé avec succès !");
+                
+                // mise à jour automatique via React Query
+                queryClient.invalidateQueries({ queryKey: ["workspaces"] });
+                
+                // Navigation vers le workspace créé
                 navigate(`/workspaces/${data._id}`);
             },
             onError: (error: any) => {
-                const errorMessage = error.response.data.message;
+                const errorMessage = error?.response?.data?.message || "Erreur lors de la création";
                 toast.error(errorMessage);  
                 console.log(error);
             }
@@ -133,4 +139,4 @@ export const CreateWorkspace = ({
             </DialogContent>
         </Dialog>
     )
-}
+};

@@ -6,12 +6,12 @@ const workspaceModel = new Schema({
     color: { type: String, default:"#2563EB"},
     owner: {
       type: Schema.Types.ObjectId,
-      ref: "User",
+      ref: "Utilisateur",
       required: true,
     },
     members: [
         {
-            user: {type: Schema.Types.ObjectId, ref: "User",},
+            user: { type: Schema.Types.ObjectId, ref: "Utilisateur" },
             role: {type: String, enum: ["owner", "member", "admin", "viewer"],
             default: "member",
         },

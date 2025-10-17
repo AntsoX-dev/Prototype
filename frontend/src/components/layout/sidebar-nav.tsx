@@ -30,15 +30,22 @@ export const SidebarNav = ({
                     const Icon = el.icon;
                     const isActive = location.pathname === el.href;
 
+                    // j'ai modifier ici "hajaina"
                     const handleClick = () => {
-                        if(el.href === "/Workspaces") {
-                            navigate(el.href);
-                        } else if (currentWorkspace && currentWorkspace._id){
-                            navigate('${el.href}?workspaceId=${currentWorkspace._id}');
-                        }else {
-                            navigate(el.href);
-                        }
+                    // Cas spécial : lien vers workspaces
+                    if (el.href === "/workspaces") {
+                        navigate("/dashboard/workspaces");
+                    } 
+                    // Si workspace actif
+                    else if (currentWorkspace && currentWorkspace._id) {
+                        navigate(`/dashboard${el.href}?workspaceId=${currentWorkspace._id}`);
+                    } 
+                    // Cas général
+                    else {
+                        navigate(`/dashboard${el.href}`);
                     }
+                    };
+
                     return <Button key={el.href}
                     variant={isActive ? "outline": "ghost"}
                     className={cn("justify-start", isActive && "bg-[#005F73]/20 text-[#005F73] font-medium",)}

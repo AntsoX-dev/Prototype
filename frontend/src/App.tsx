@@ -6,6 +6,7 @@ import ResetPassword from "./authentification/reset-password";
 import VerifyEmail from "./authentification/verify-email";
 import DashboardLayout from "./dashboard/dashboard-layout";
 import Dashboard from "./dashboard/index";
+import MyTasks from "./dashboard/my-tasks";
 
 function App() {
   return (
@@ -16,9 +17,12 @@ function App() {
       <Route path="/mdpoublie" element={<MdpOublie />} />
       <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/verify-email" element={<VerifyEmail />} />
+
       <Route path="/dashboard" element={<DashboardLayout />}>
         <Route index element={<Dashboard />} />
-      </Route> 
+        <Route path="my-tasks" element={<MyTasks />} />
+      </Route>
+
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );

@@ -27,18 +27,22 @@ const createWorkspace = async (req, res) => {
   }
 };
 
+// j'ai corriger ici 
 const getWorkspaces = async (req, res) => {
   try {
-    const workspace = await Workspace.find({
-        "members.user": req.user._id
-    }).sort({createdAt: -1});
+    const workspaces = await Workspace.find({
+      "members.user": req.user._id
+    }).sort({ createdAt: -1 });
+
+    res.status(200).json(workspaces); // il manquait cette ligne
   } catch (error) {
     console.log(error);
     res.status(500).json({
       message: "Erreur interne du serveur",
     });
   }
-}
+};
+
 
 
 export {
