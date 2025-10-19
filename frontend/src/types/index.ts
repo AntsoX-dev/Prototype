@@ -24,36 +24,55 @@ export interface Workspace {
         role: 'admin' | 'member' |'owner' |'viewer';
         joinedAt: Date;
     }[];
-    created: Date;
-    updated: Date;
+    createdAt: Date;
+    updatedAt: Date;
 }
 
 // Types minimaux pour que tout compile correctement
 export type TaskStatus = "To Do" | "In Progress" | "Done";
 export type TaskPriority = "Low" | "Medium" | "High";
 
+export enum ProjectStatus {
+  PLANNING = "Planning",
+  IN_PROGRESS = "In Progress",
+  ON_HOLD = "On Hold",
+  COMPLETED = "Completed",
+  CANCELLED = "Cancelled",
+}
 export interface Project {
   _id: string;
   title: string;
-  workspace?: string;
-}
-
-export interface User {
-  _id: string;
-  name?: string;
-  email?: string;
+  description?: string;
+  status: ProjectStatus;
+  workspace?: Workspace;
+  startDate: Date;
+  dueDate: Date;
+  progress: number;
+  tasks: Task[];
+  members: {
+    user: Utilisateur;
+    role: "admin" | "member" | "owner" | "viewer";
+  }[];
+  createdAt: Date;
+  updatedAt: Date;
+  isArchived: boolean;
 }
 
 export interface Subtask {
   _id: string;
   title: string;
   completed?: boolean;
+  createdAt: Date;
 }
 
 export interface Attachment {
+  fileName: string;
+  fileUrl: string;
+  fileType: string;
+  fileSize: number;
+  uploadedBy: string;
+  uploadedAt: Date;
   _id: string;
-  fileUrl?: string;
-  fileName?: string;
 }
 
 export interface Task {
@@ -67,10 +86,10 @@ export interface Task {
   isArchived: boolean;
   dueDate?: Date | string | null;
   priority?: TaskPriority;
-  assignee?: User | string;
-  createdBy?: User | string;
-  assignees?: User[];
+  assignee?: Utilisateur | string;
+  createdBy?: Utilisateur | string;
+  assignees?: Utilisateur[];
   subtasks?: Subtask[];
-  watchers?: User[];
+  watchers?: Utilisateur[];
   attachments?: Attachment[];
 }

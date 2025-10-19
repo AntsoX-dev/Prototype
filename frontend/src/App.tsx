@@ -7,6 +7,8 @@ import VerifyEmail from "./authentification/verify-email";
 import DashboardLayout from "./dashboard/dashboard-layout";
 import Dashboard from "./dashboard/index";
 import MyTasks from "./dashboard/my-tasks";
+import Workspaces from "./dashboard/workspaces";
+import WorkspaceDetails from "./dashboard/workspaces/workspace-details";
 
 function App() {
   return (
@@ -21,6 +23,8 @@ function App() {
       <Route path="/dashboard" element={<DashboardLayout />}>
         <Route index element={<Dashboard />} />
         <Route path="my-tasks" element={<MyTasks />} />
+        <Route path="workspaces" element={<Workspaces/>} />
+        <Route path="workspaces/:workspaceId" element={<WorkspaceDetails />} />
       </Route>
 
       <Route path="*" element={<Navigate to="/" replace />} />

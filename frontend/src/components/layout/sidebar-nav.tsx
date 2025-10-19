@@ -28,23 +28,24 @@ export const SidebarNav = ({
             {
                 items.map((el) => {
                     const Icon = el.icon;
-                    const isActive = location.pathname === el.href;
+                    const isActive =
+                    el.href === "/dashboard"
+                        ? location.pathname === "/dashboard"
+                        : location.pathname.startsWith(el.href);
 
-                    // j'ai modifier ici "hajaina"
+
+
                     const handleClick = () => {
-                    // Cas spécial : lien vers workspaces
-                    if (el.href === "/workspaces") {
-                        navigate("/dashboard/workspaces");
-                    } 
-                    // Si workspace actif
-                    else if (currentWorkspace && currentWorkspace._id) {
-                        navigate(`/dashboard${el.href}?workspaceId=${currentWorkspace._id}`);
-                    } 
-                    // Cas général
-                    else {
-                        navigate(`/dashboard${el.href}`);
+                    let path = el.href;
+
+                    // Cas spécial : workspace actif, ajouter l’ID
+                    if (currentWorkspace && currentWorkspace._id && el.href === "/dashboard/workspaces") {
+                        path += `/${currentWorkspace._id}`;
                     }
+
+                    navigate(path);
                     };
+
 
                     return <Button key={el.href}
                     variant={isActive ? "outline": "ghost"}

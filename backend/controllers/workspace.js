@@ -1,4 +1,5 @@
 import Workspace from "../models/workspace.js";
+import Project from "../models/project.js";
 
 const createWorkspace = async (req, res) => {
   try {
@@ -27,14 +28,14 @@ const createWorkspace = async (req, res) => {
   }
 };
 
-// j'ai corriger ici 
+
 const getWorkspaces = async (req, res) => {
   try {
     const workspaces = await Workspace.find({
       "members.user": req.user._id
     }).sort({ createdAt: -1 });
 
-    res.status(200).json(workspaces); // il manquait cette ligne
+    res.status(200).json(workspaces); 
   } catch (error) {
     console.log(error);
     res.status(500).json({
@@ -43,9 +44,50 @@ const getWorkspaces = async (req, res) => {
   }
 };
 
+const getWorkspaceDetails = async (req, res) => {
+  try {
+    const { workspaceId } = req.params;
+    const workspace = await Workspace.findOne({_id: workspaceId, "members.user": req.user._id,}).populate("members.user", 
+      "name email profilePicture");
 
+    if (!workspace) {
+      return res.status(404).json({ message: "Espace de travail non trouvé" });
+    }
+
+    res.status(200).json(workspace);
+  } catch (error) {
+
+  }
+};
+
+const getWorkspaceProjects = async (req, res) => {
+ try {
+    const { workspaceId } = req.params;
+    const workspace = await Workspace.findOne({_id: workspaceId,"members.user": req.user._id,}).populate("members.user", 
+      "name email profilePicture");
+    if (!workspace) {
+      return res.status(404).json({ message: "Espace de travail non trouvé" });
+    }
+    const projects = await Project.find({ 
+      workspace: workspaceId,
+      isArchived: false,
+      members: {$in: [req.user._id]},
+    })
+    .populate("tasks", "status")
+    .sort({ createdAt: -1});
+
+    res.status(200).json({ projects, workspace });
+ } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      message: "Erreur interne du serveur",
+    });
+ }
+}
 
 export {
   createWorkspace,
-  getWorkspaces
+  getWorkspaces,
+  getWorkspaceDetails,
+  getWorkspaceProjects
 };

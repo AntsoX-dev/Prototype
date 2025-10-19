@@ -21,27 +21,27 @@ const navItems = [
     },
     {
       title: "Espaces de Travail",
-      href: "/workspaces",
+      href: "/dashboard/workspaces",
       icon: Users,
     },
     {
       title: "Mes Tâches",
-      href: "/my-tasks",
+      href: "/dashboard/my-tasks",
       icon: ListCheck,
     },
     {
       title: "Membres",
-      href: `/members`,
+      href: `/dashboard/members`,
       icon: Users,
     },
     {
       title: "Accomplies",
-      href: `/achieved`,
+      href: `/dashboard/achieved`,
       icon: CheckCircle2,
     },
     {
       title: "Paramètres",
-      href: "/settings",
+      href: "/dashboard/settings",
       icon: Settings,
     },
   ];
