@@ -14,14 +14,14 @@ const commentSchema = new Schema(
     },
     author: {
       type: Schema.Types.ObjectId,
-      ref: "User",
+      ref: "Utilisateur",
       required: true,
     },
     mentions: [
       {
         user: {
           type: Schema.Types.ObjectId,
-          ref: "User",
+          ref: "Utilisateur",
         },
         offset: {
           type: Number,
@@ -38,7 +38,7 @@ const commentSchema = new Schema(
         },
         user: {
           type: Schema.Types.ObjectId,
-          ref: "User",
+          ref: "Utilisateur",
         },
       },
     ],

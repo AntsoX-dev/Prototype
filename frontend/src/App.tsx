@@ -9,6 +9,8 @@ import Dashboard from "./dashboard/index";
 import MyTasks from "./dashboard/my-tasks";
 import Workspaces from "./dashboard/workspaces";
 import WorkspaceDetails from "./dashboard/workspaces/workspace-details";
+import ProjectDetails from "./dashboard/project/project-details";
+import TaskDetails from "./dashboard/task/task-details";
 
 function App() {
   return (
@@ -23,8 +25,10 @@ function App() {
       <Route path="/dashboard" element={<DashboardLayout />}>
         <Route index element={<Dashboard />} />
         <Route path="my-tasks" element={<MyTasks />} />
-        <Route path="workspaces" element={<Workspaces/>} />
+        <Route path="workspaces" element={<Workspaces />} />
         <Route path="workspaces/:workspaceId" element={<WorkspaceDetails />} />
+        <Route path="workspaces/:workspaceId/projects/:projectId" element={<ProjectDetails />} />
+        <Route path="/dashboard/workspaces/:workspaceId/projects/:projectId/tasks/:taskId" element={<TaskDetails />} />
       </Route>
 
       <Route path="*" element={<Navigate to="/" replace />} />

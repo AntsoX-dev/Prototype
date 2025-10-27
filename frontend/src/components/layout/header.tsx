@@ -6,7 +6,7 @@ import { Bell, PlusCircle } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuLabel, DropdownMenuTrigger } from "../ui/dropdown-menu";
 import { Avatar, AvatarImage, AvatarFallback } from "../ui/avatar";
 import { DropdownMenuItem, DropdownMenuSeparator } from "../ui/dropdown-menu";
-import { Link } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { WorkspaceAvatar } from "../workspace/workspace-avatar";
 import { fetchData } from "../../libs/fetch-utils";
 
@@ -14,7 +14,7 @@ interface HeaderProps {
   onWorkspaceSelected: (workspace: Workspace) => void;
   selectedWorkspace: Workspace | null;
   onCreateWorkspace: () => void;
-  workspaces: Workspace[]; 
+  workspaces: Workspace[];
 }
 
 export const Header = ({
@@ -22,8 +22,10 @@ export const Header = ({
   selectedWorkspace,
   onCreateWorkspace,
 }: HeaderProps) => {
+  const navigate = useNavigate()
   const { utilisateur, logout } = useAuth();
   const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
+  const isOnWorkspacePage = useLocation().pathname.includes("/workspaces");
 
   // On charge les workspaces dès que le composant est monté
   useEffect(() => {
@@ -37,6 +39,18 @@ export const Header = ({
     };
     loadWorkspaces();
   }, []);
+
+  const handleOnClick = (workspace: Workspace) => {
+    onWorkspaceSelected(workspace);
+    const location = window.location;
+
+    if (isOnWorkspacePage) {
+      navigate(`/dashboard/workspaces/${workspace._id}`)
+    } else {
+      const basePath = location.pathname
+      navigate(`${basePath}?workspaceId=${workspace._id}`);
+    }
+  };
 
   return (
     <div className="bg-background sticky top-0 z-40 border-b">
@@ -70,7 +84,7 @@ export const Header = ({
               {workspaces.map((ws) => (
                 <DropdownMenuItem
                   key={ws._id}
-                  onClick={() => onWorkspaceSelected(ws)}
+                  onClick={() => handleOnClick(ws)}
                 >
                   {ws.color && (
                     <WorkspaceAvatar color={ws.color} name={ws.name} />

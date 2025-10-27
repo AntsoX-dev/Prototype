@@ -26,7 +26,7 @@ const projectSchema = new Schema(
       {
         user: {
           type: Schema.Types.ObjectId,
-          ref: "User",
+          ref: "Utilisateur",
         },
         role: {
           type: String,
@@ -36,7 +36,7 @@ const projectSchema = new Schema(
       },
     ],
     tags: [{ type: String }],
-    createdBy: { type: Schema.Types.ObjectId, ref: "User", required: true },
+    createdBy: { type: Schema.Types.ObjectId, ref: "Utilisateur", required: true },
     isArchived: { type: Boolean, default: false },
   },
   { timestamps: true }
@@ -45,4 +45,3 @@ const projectSchema = new Schema(
 const Project = mongoose.model("Project", projectSchema);
 
 export default Project;
- 

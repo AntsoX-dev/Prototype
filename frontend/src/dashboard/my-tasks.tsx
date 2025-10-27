@@ -135,11 +135,10 @@ const MyTasks: React.FC = () => {
         <div className="mb-4 inline-flex bg-gray-200 p-1 rounded-xl">
           <button
             onClick={() => handleViewChange("list")}
-            className={`inline-flex items-center gap-2 px-4 py-1.5 text-sm font-semibold rounded-lg transition ${
-              viewMode === "list"
-                ? "bg-white text-gray-900 shadow-sm"
-                : "text-gray-700"
-            }`}
+            className={`inline-flex items-center gap-2 px-4 py-1.5 text-sm font-semibold rounded-lg transition ${viewMode === "list"
+              ? "bg-white text-gray-900 shadow-sm"
+              : "text-gray-700"
+              }`}
           >
             <List className="w-4 h-4" />
             Vue en liste
@@ -147,11 +146,10 @@ const MyTasks: React.FC = () => {
 
           <button
             onClick={() => handleViewChange("grid")}
-            className={`inline-flex items-center gap-2 px-4 py-1.5 text-sm font-semibold rounded-lg transition ${
-              viewMode === "grid"
-                ? "bg-white text-gray-900 shadow-sm"
-                : "text-gray-700"
-            }`}
+            className={`inline-flex items-center gap-2 px-4 py-1.5 text-sm font-semibold rounded-lg transition ${viewMode === "grid"
+              ? "bg-white text-gray-900 shadow-sm"
+              : "text-gray-700"
+              }`}
           >
             <Grid className="w-4 h-4" />
             Vue en grille
@@ -160,9 +158,8 @@ const MyTasks: React.FC = () => {
 
         {/* Carte principale */}
         <div
-          className={`bg-white border border-gray-200 rounded-3xl shadow-sm p-5 transition-opacity duration-300 ${
-            isFading ? "opacity-0" : "opacity-100"
-          }`}
+          className={`bg-white border border-gray-200 rounded-3xl shadow-sm p-5 transition-opacity duration-300 ${isFading ? "opacity-0" : "opacity-100"
+            }`}
         >
           <div className="flex items-center justify-between mb-3">
             <div>
@@ -204,16 +201,16 @@ const MyTasks: React.FC = () => {
                           {task.status === "In Progress"
                             ? "En Cours"
                             : task.status === "To Do"
-                            ? "À faire"
-                            : "Terminé"}
+                              ? "À faire"
+                              : "Terminé"}
                         </span>
                         {task.priority && (
                           <span className="px-2 py-0.5 border border-gray-300 rounded-full text-xs bg-white text-gray-700">
                             {task.priority === "High"
                               ? "Haute"
                               : task.priority === "Medium"
-                              ? "Moyen"
-                              : "Basse"}
+                                ? "Moyen"
+                                : "Basse"}
                           </span>
                         )}
                       </div>
