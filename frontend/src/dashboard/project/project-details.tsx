@@ -26,7 +26,7 @@ const statusLabels: Record<TaskStatus, string> = {
 const getPriorityLabel = (priority: "Low" | "Medium" | "High") => {
     switch (priority) {
         case "Low":
-            return "Faible";
+            return "Basse";
         case "Medium":
             return "Moyenne";
         case "High":

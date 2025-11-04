@@ -4,10 +4,19 @@ import { getProjectProgress, getTaskStatusColor } from "../../libs";
 import { Link, useSearchParams } from "react-router-dom";
 import { cn } from "../../libs/utils";
 import { Progress } from "../ui/progress";
+import { Button } from "../../components/button";
+import { useNavigate } from "react-router-dom";
 
 export const RecentProjects = ({ data }: { data: Project[] }) => {
     const [searchParams] = useSearchParams();
     const workspaceId = searchParams.get("workspaceId");
+    const navigate = useNavigate();
+
+    const handleViewAllProjects = () => {
+        if (workspaceId) {
+            navigate(`/dashboard/workspaces/${workspaceId}`);
+        }
+    };
 
     return (
         <Card className="lg:col-span-2">
@@ -46,7 +55,7 @@ export const RecentProjects = ({ data }: { data: Project[] }) => {
                             <div key={project._id} className="border rounded-lg p-4">
                                 <div className="flex items-center justify-between mb-2">
                                     <Link
-                                        to={`/workspaces/${workspaceId}/projects/${project._id}`}
+                                        to={`/dashboard/workspaces/${workspaceId}/projects/${project._id}`}
                                     >
                                         <h3 className="font-medium hover:text-primary transition-colors">
                                             {project.title}
@@ -78,6 +87,19 @@ export const RecentProjects = ({ data }: { data: Project[] }) => {
                             </div>
                         );
                     })
+                )}
+
+                {/* Bouton "Voir tous les projets" */}
+                {workspaceId && (
+                    <div className="mt-6 text-center">
+                        <Button
+                            variant="outline"
+                            onClick={handleViewAllProjects}
+                            className="inline-flex items-center justify-center space-x-2"
+                        >
+                            <span>Voir tous les projets</span>
+                        </Button>
+                    </div>
                 )}
             </CardContent>
         </Card>

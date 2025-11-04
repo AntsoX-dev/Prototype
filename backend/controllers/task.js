@@ -644,6 +644,54 @@ const getMyTasks = async (req, res) => {
     }
 };
 
+// controllers/task.js (ajoute ceci)
+const getTaskTrends = async (req, res) => {
+    try {
+        const now = new Date();
+        const startOfWeek = new Date(now);
+        startOfWeek.setDate(now.getDate() - now.getDay());
+        startOfWeek.setHours(0, 0, 0, 0);
+
+        const tasks = await Task.find({
+            createdAt: { $gte: startOfWeek },
+            isArchived: false,
+        });
+
+        const days = ["Dim", "Lun", "Mar", "Mer", "Jeu", "Ven", "Sam"];
+        const trends = days.map((day) => ({
+            name: day,
+            completed: 0,
+            inProgress: 0,
+            toDo: 0,
+        }));
+
+        tasks.forEach((task) => {
+            const date = new Date(task.updatedAt || task.createdAt);
+            if (date >= startOfWeek) {
+                const dayIndex = date.getDay();
+                const entry = trends[dayIndex];
+                switch (task.status) {
+                    case "Done":
+                        entry.completed++;
+                        break;
+                    case "In Progress":
+                        entry.inProgress++;
+                        break;
+                    default:
+                        entry.toDo++;
+                        break;
+                }
+            }
+        });
+
+        res.status(200).json(trends);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Erreur interne du serveur" });
+    }
+};
+
+
 export {
     createTask,
     getTaskById,
@@ -660,4 +708,6 @@ export {
     watchTask,
     achievedTask,
     getMyTasks,
+    getTaskTrends,
+
 };

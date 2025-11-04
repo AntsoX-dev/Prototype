@@ -8,7 +8,7 @@ import {
     CardTitle,
 } from "./ui/Card";
 import { cn } from "../lib/utils";
-import { CheckCircle2, Circle } from "lucide-react";
+import { CheckCircle2, Circle, Loader2 } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 
@@ -47,6 +47,10 @@ export const UpcomingTasks = ({ data }: { data: Task[] }) => {
                             >
                                 {task.status === "Done" ? (
                                     <CheckCircle2 className="w-4 h-4" />
+                                ) : task.status === "In Progress" ? (
+                                    <Loader2 className="w-4 h-4 animate-spin" />
+                                ) : task.status === "To Do" ? (
+                                    <Circle className="w-4 h-4" />
                                 ) : (
                                     <Circle className="w-4 h-4" />
                                 )}

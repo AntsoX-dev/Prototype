@@ -57,14 +57,15 @@ export const StatisticsCharts = ({
                     </div>
                     <ChartLine className="size-5 text-muted-foreground" />
                 </CardHeader>
+
                 <CardContent className="w-full overflow-x-auto md:overflow-x-hidden">
                     <div className="min-w-[350px]">
                         <ChartContainer
                             className="h-[300px]"
                             config={{
-                                completed: { color: "#10b981" }, // green
-                                inProgress: { color: "#f59e0b" }, // blue
-                                todo: { color: "#3b82f6" }, // gray
+                                completed: { color: "#10b981" }, // vert
+                                inProgress: { color: "#f59e0b" }, // orange
+                                todo: { color: "#3b82f6" }, // bleu
                             }}
                         >
                             <LineChart data={taskTrendsData}>
@@ -84,13 +85,13 @@ export const StatisticsCharts = ({
 
                                 <CartesianGrid strokeDasharray={"3 3"} vertical={false} />
                                 <ChartTooltip />
-
                                 <Line
                                     type="monotone"
                                     dataKey={"completed"}
                                     stroke="#10b981"
                                     strokeWidth={2}
                                     dot={{ r: 4 }}
+                                    name="Terminées"
                                 />
                                 <Line
                                     type="monotone"
@@ -98,13 +99,15 @@ export const StatisticsCharts = ({
                                     stroke="#3b82f6"
                                     strokeWidth={2}
                                     dot={{ r: 4 }}
+                                    name="En cours"
                                 />
                                 <Line
                                     type="monotone"
-                                    dataKey="todo"
+                                    dataKey="toDo"
                                     stroke="#6b7280"
                                     strokeWidth={2}
                                     dot={{ r: 4 }}
+                                    name="À faire"
                                 />
 
                                 <ChartLegend content={<ChartLegendContent />} />
@@ -113,6 +116,7 @@ export const StatisticsCharts = ({
                     </div>
                 </CardContent>
             </Card>
+
 
             {/* project status  */}
 

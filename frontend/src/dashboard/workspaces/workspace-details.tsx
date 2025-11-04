@@ -6,6 +6,7 @@ import { Loader } from "../../components/ui/loader";
 import { WorkspaceHeader } from "./workspace-header";
 import { ProjectList } from "./project-list";
 import { CreateProjectDialog } from "../../components/project/create-project";
+import { InviteMemberDialog } from "../../components/workspace/invite-member";
 
 const WorkspaceDetails = () => {
     const { workspaceId } = useParams<{ workspaceId: string }>();
@@ -23,38 +24,44 @@ const WorkspaceDetails = () => {
         };
         isLoading: boolean;
     };
-    
-    if(isLoading){
+
+    if (isLoading) {
         return (
-        <div>
-            <Loader/>
-        </div>
+            <div>
+                <Loader />
+            </div>
         )
     }
-  return (
-    <div className="space-y-8">
-        <WorkspaceHeader
-        
-        workspace={data.workspace}
-        members={data?.workspace?.members as any}
-        onCreateProject={()=> setIsCreateProject(true)}
-        onInviteMember={()=> setIsInviteMember(true)}
-        />
-        
-        <ProjectList
-            workspaceId={workspaceId}
-            projects={data.projects}
-            onCreateProject={() => setIsCreateProject(true)}
-        />
+    return (
+        <div className="space-y-8">
+            <WorkspaceHeader
 
-        <CreateProjectDialog
-            isOpen={isCreateProject}
-            onOpenChange={setIsCreateProject}
-            workspaceId={workspaceId}
-            workspaceMembers={data.workspace.members as any}
-        />
-    </div>
-  )
+                workspace={data.workspace}
+                members={data?.workspace?.members as any}
+                onCreateProject={() => setIsCreateProject(true)}
+                onInviteMember={() => setIsInviteMember(true)}
+            />
+
+            <ProjectList
+                workspaceId={workspaceId}
+                projects={data.projects}
+                onCreateProject={() => setIsCreateProject(true)}
+            />
+
+            <CreateProjectDialog
+                isOpen={isCreateProject}
+                onOpenChange={setIsCreateProject}
+                workspaceId={workspaceId}
+                workspaceMembers={data.workspace.members as any}
+            />
+
+            <InviteMemberDialog
+                isOpen={isInviteMember}
+                onOpenChange={setIsInviteMember}
+                workspaceId={workspaceId}
+            />
+        </div>
+    )
 }
 
 export default WorkspaceDetails

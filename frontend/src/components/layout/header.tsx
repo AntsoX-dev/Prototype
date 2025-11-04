@@ -124,7 +124,7 @@ export const Header = ({
               <DropdownMenuLabel>Mon Compte</DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuItem>
-                <Link to="/utilisateur/profile">Profil</Link>
+                <Link to="/user/profile">Profil</Link>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={logout}>

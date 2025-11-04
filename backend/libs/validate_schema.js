@@ -17,6 +17,15 @@ const resetPasswordSchema = z.object({
     confirmPassword: z.string().min(1, "La confirmation de mot de passe est requis"),
 });
 
+const inviteMemberSchema = z.object({
+    email: z.string().email("Invalid email address"),
+    role: z.enum(["admin", "member", "viewer"]),
+});
+
+const tokenSchema = z.object({
+    token: z.string().min(1, "Token est Obligatoire"),
+});
+
 const workspaceSchema = z.object({
     name: z.string().min(1, "Le nom est requis"),
     description: z.string().optional(),
@@ -58,4 +67,4 @@ const taskSchema = z.object({
     assignees: z.array(z.string()).min(1, "At least one assignee is required"),
 });
 
-export { registerSchema, loginSchema, verifyEmailSchema, resetPasswordSchema, workspaceSchema, projectSchema, taskSchema };
+export { registerSchema, loginSchema, verifyEmailSchema, resetPasswordSchema, workspaceSchema, projectSchema, taskSchema, inviteMemberSchema, tokenSchema };

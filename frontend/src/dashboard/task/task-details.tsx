@@ -226,14 +226,12 @@ const TaskDetails = () => {
                             taskId={task._id}
                         />
 
-
                         <SubTasksDetails subTasks={task.subtasks || []} taskId={task._id} />
                     </div>
 
                     <CommentSection taskId={task._id} members={project.members as any} />
                 </div>
 
-                {/* Colonne droite — secondaires (watchers + activity) */}
                 <div className="lg:w-1/3 w-full space-y-6">
                     <Watchers watchers={task.watchers || []} />
                     <TaskActivity resourceId={task._id} />

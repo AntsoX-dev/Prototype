@@ -8,7 +8,6 @@ import { Button } from '../button';
 import { ScrollArea } from '../ui/scroll-area';
 import { SidebarNav } from './sidebar-nav';
 
-
 export const SidebarComponent = ({ currentWorkspace }: { currentWorkspace: Workspace | null }) => {
   const { utilisateur, logout } = useAuth();
   const [isCollapsed, setIsCollapsed] = useState(false);
@@ -31,12 +30,12 @@ export const SidebarComponent = ({ currentWorkspace }: { currentWorkspace: Works
     },
     {
       title: "Membres",
-      href: `/dashboard/members`,
+      href: "/dashboard/members",
       icon: Users,
     },
     {
-      title: "Accomplies",
-      href: `/dashboard/achieved`,
+      title: "Archivés",
+      href: "/dashboard/achieved",
       icon: CheckCircle2,
     },
     {
@@ -45,10 +44,13 @@ export const SidebarComponent = ({ currentWorkspace }: { currentWorkspace: Works
       icon: Settings,
     },
   ];
+
   return (
-    <div className={cn("flex flex-col border-r bg-sidebar traansition-all duration-300",
-      isCollapsed ? "w-16 md:w-[80px]" : "w-16 md:w-[240px]"
-    )}
+    <div
+      className={cn(
+        "flex flex-col border-r bg-sidebar transition-all duration-300",
+        isCollapsed ? "w-16 md:w-[80px]" : "w-16 md:w-[240px]"
+      )}
     >
       <div className='flex h-14 items-center border-b px-4 mb-4'>
         <Link to="/dashboard" className='flex items-center'>
@@ -60,9 +62,7 @@ export const SidebarComponent = ({ currentWorkspace }: { currentWorkspace: Works
               </span>
             </div>
           )}
-
           {isCollapsed && <ClipboardCheck className='size-6 text-[#005F73]' />}
-
         </Link>
         <Button
           variant={"ghost"}
@@ -70,30 +70,45 @@ export const SidebarComponent = ({ currentWorkspace }: { currentWorkspace: Works
           className='ml-auto hidden md:block'
           onClick={() => setIsCollapsed(!isCollapsed)}
         >
-          {
-            isCollapsed ? (<ChevronsRight className='size-4' />
-
-            ) : (
-              <ChevronsLeft className='size-4' />
-            )}
+          {isCollapsed ? (
+            <ChevronsRight className='size-4' />
+          ) : (
+            <ChevronsLeft className='size-4' />
+          )}
         </Button>
       </div>
+
       <ScrollArea className='flex-1 px-3 py-2'>
         <SidebarNav
           items={navItems}
           isCollapsed={isCollapsed}
-          className={
-            cn(isCollapsed && "items-center space-y-2")
-          }
+          className={cn(isCollapsed && "items-center space-y-2")}
           currentWorkspace={currentWorkspace}
         />
       </ScrollArea>
-      <div>
-        <Button variant={"ghost"} size={isCollapsed ? "icon" : "default"} onClick={logout}>
-          <LogOut className={cn('size-4', isCollapsed && 'mr-2')} />
-          <span className='hidden md:block'>Déconnexion</span>
+
+      <div className={cn("p-3", isCollapsed && "flex justify-center")}>
+        <Button
+          variant={"ghost"}
+          className={cn(
+            "w-full justify-start gap-x-2 transition-colors duration-300",
+            isCollapsed
+              ? "justify-center w-auto p-2 text-red-600 hover:text-red-700 hover:bg-red-100"
+              : "hover:bg-[#005F73]/10"
+          )}
+          onClick={logout}
+        >
+          <LogOut
+            className={cn(
+              "size-4 transition-colors duration-300",
+              isCollapsed && "text-red-600"
+            )}
+          />
+          {!isCollapsed && <span>Déconnexion</span>}
         </Button>
       </div>
+
+
     </div>
-  )
-}
+  );
+};

@@ -30,3 +30,8 @@ export const createTaskSchema = z.object({
     dueDate: z.string().min(1, "La date d'échéance est obligatoire"),
     assignees: z.array(z.string()).min(1, "Vous devez assigner au moins une personne"),
 });
+
+export const inviteMemberSchema = z.object({
+    email: z.string().email(),
+    role: z.enum(["admin", "member", "viewer"]),
+});

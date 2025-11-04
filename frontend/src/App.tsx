@@ -11,6 +11,11 @@ import Workspaces from "./dashboard/workspaces";
 import WorkspaceDetails from "./dashboard/workspaces/workspace-details";
 import ProjectDetails from "./dashboard/project/project-details";
 import TaskDetails from "./dashboard/task/task-details";
+import Members from "./dashboard/members";
+import WorkspaceInvite from "./dashboard/workspaces/workspace-invite";
+import UserLayout from "./user/user-layout";
+import UserProfile from "./user/profile";
+
 
 function App() {
   return (
@@ -29,6 +34,14 @@ function App() {
         <Route path="workspaces/:workspaceId" element={<WorkspaceDetails />} />
         <Route path="workspaces/:workspaceId/projects/:projectId" element={<ProjectDetails />} />
         <Route path="/dashboard/workspaces/:workspaceId/projects/:projectId/tasks/:taskId" element={<TaskDetails />} />
+        <Route path="/dashboard/members" element={<Members />} />
+      </Route>
+
+      <Route path="/workspace-invite/:workspaceId" element={<WorkspaceInvite />} />
+
+      {/* User routes */}
+      <Route path="/user" element={<UserLayout />}>
+        <Route path="profile" element={<UserProfile />} />
       </Route>
 
       <Route path="*" element={<Navigate to="/" replace />} />

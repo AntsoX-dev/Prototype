@@ -5,10 +5,12 @@ import mongoose from "mongoose";
 import morgan from "morgan";
 
 import routes from "./routes/index.js"
+import bodyParser from 'body-parser'
 
 dotenv.config();
 
 const app = express();
+
 
 //CORS frontend + tests
 app.use(
@@ -21,6 +23,8 @@ app.use(
 
 
 app.use(morgan("dev"));
+app.use(bodyParser.json({ limit: '50mb' }));
+app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
 app.use(express.json());
 
 // Vérifier que URI est bien lu
@@ -38,7 +42,7 @@ mongoose
     console.error(err.message);
   });
 
- //Route test 
+//Route test 
 app.get("/", async (req, res) => {
   res.status(200).json({
     message: "Bienvenue Planifio API",
@@ -53,7 +57,7 @@ app.get("/health", (req, res) => {
   const state = mongoose.connection.readyState;
 
   let status;
-  switch(state) {
+  switch (state) {
     case 0: status = "disconnected"; break;
     case 1: status = "connected"; break;
     case 2: status = "connecting"; break;

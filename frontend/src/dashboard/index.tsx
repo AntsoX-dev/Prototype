@@ -15,6 +15,7 @@ import type {
 } from "../types";
 import { useSearchParams } from "react-router-dom";
 
+
 const Dashboard = () => {
   const [searchParams] = useSearchParams();
   const workspaceId = searchParams.get("workspaceId");
@@ -32,9 +33,9 @@ const Dashboard = () => {
     isPending: boolean;
   };
 
-  if (isPending) {
+  if (isPending || !data) {
     return (
-      <div>
+      <div className="flex justify-center items-center h-full">
         <Loader />
       </div>
     );
@@ -46,7 +47,7 @@ const Dashboard = () => {
         <h1 className="text-2xl font-bold">Tableau de bord</h1>
       </div>
 
-      <StatsCard data={data.stats} />
+      {data.stats && <StatsCard data={data.stats} />}
 
       <StatisticsCharts
         stats={data.stats}
@@ -56,12 +57,18 @@ const Dashboard = () => {
         workspaceProductivityData={data.workspaceProductivityData}
       />
 
-      <div className="grid gap-6 lg:grid-cols-2">
-        <RecentProjects data={data.recentProjects} />
-        <UpcomingTasks data={data.upcomingTasks} />
+      <div className="grid gap-6 md:grid-cols-3 auto-rows-min">
+        <div className="md:col-span-2">
+          <RecentProjects data={data.recentProjects} />
+        </div>
+
+        <div className="md:col-span-1">
+          <UpcomingTasks data={data.upcomingTasks} />
+        </div>
       </div>
     </div>
   );
 };
 
 export default Dashboard;
+
