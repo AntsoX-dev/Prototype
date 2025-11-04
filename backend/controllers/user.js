@@ -31,7 +31,6 @@ const updateUserProfile = async (req, res) => {
         }
 
         user.name = name;
-        user.profilePicture = profilePicture;
 
         await user.save();
 
