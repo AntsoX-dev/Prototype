@@ -131,7 +131,7 @@ const Members = () => {
                                                         ? "Administrateur"
                                                         : member.role === "member"
                                                             ? "Membre"
-                                                            : "Invité"}
+                                                            : "Observateur"}
                                             </Badge>
 
                                             <Badge variant={"outline"}>{data.name}</Badge>
@@ -182,7 +182,7 @@ const Members = () => {
                                                 ? "Administrateur"
                                                 : member.role === "member"
                                                     ? "Membre"
-                                                    : "Invité"}
+                                                    : "Observateur"}
                                     </Badge>
                                 </CardContent>
                             </Card>
