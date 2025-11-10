@@ -22,9 +22,22 @@ import { useGetMyTasksQuery } from "../hooks/use-task";
 import type { Task } from "../types";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { ArrowUpRight, CheckCircle, Clock, FilterIcon } from "lucide-react";
+import { ArrowUpRight, CheckCircle, Clock, FilterIcon, Loader2 } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
+
+const getPriorityColor = (priority: string) => {
+  switch (priority) {
+    case "High":
+      return "text-red-600";
+    case "Medium":
+      return "text-orange-600";
+    case "Low":
+      return "text-green-600";
+    default:
+      return "text-gray-500";
+  }
+};
 
 const MyTasks = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -197,13 +210,13 @@ const MyTasks = () => {
                             </div>
                           ) : (
                             <div className="p-1.5 rounded-full bg-yellow-100 text-yellow-600">
-                              <Clock className="size-4" />
+                              <Loader2 className="w-4 h-4 animate-spin" />
                             </div>
                           )}
                         </div>
 
-                        {/* Conteneur des informations à décaler */}
-                        <div className="ml-4"> {/* Décalage ajouté ici */}
+                        {/* Conteneur des informations */}
+                        <div className="ml-4">
                           <Link
                             to={`/dashboard/workspaces/${task.project?.workspace ?? ""}/projects/${task.project?._id ?? ""}/tasks/${task._id}`}
                             className="font-medium hover:text-primary hover:underline transition-colors flex items-center"
@@ -245,11 +258,15 @@ const MyTasks = () => {
                         </div>
                       </div>
 
-                      {/* Côté droit parfaitement aligné */}
+                      {/* Côté droit */}
                       <div className="text-sm text-muted-foreground w-[280px] flex-shrink-0 grid grid-cols-1 gap-1 text-right">
                         <div className="flex justify-between gap-2">
-                          <span className="text-amber-600 font-medium whitespace-nowrap">Échéance :</span>
-                          <span className="text-amber-600 font-medium whitespace-nowrap">
+                          <span className={`font-medium ${getPriorityColor(task.priority ?? "Low")}`}>
+                            Échéance :
+                          </span>
+                          <span
+                            className={`font-medium whitespace-nowrap ${getPriorityColor(task.priority ?? "Low")}`}
+                          >
                             {task.dueDate
                               ? format(new Date(task.dueDate), "EEEE d MMMM yyyy", { locale: fr })
                               : "—"}
@@ -284,8 +301,7 @@ const MyTasks = () => {
           </Card>
         </TabsContent>
 
-
-        {/* Vue Tableau — inchangée */}
+        {/* Vue Tableau */}
         <TabsContent value="board">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {[{ title: "À faire", data: todoTasks },
@@ -301,18 +317,17 @@ const MyTasks = () => {
 
                 <CardContent className="p-3 space-y-3 max-h-[600px] overflow-y-auto">
                   {col.data?.map((task) => (
-                    <Card
-                      key={task._id}
-                      className="hover:shadow-md transition-shadow"
-                    >
+                    <Card key={task._id} className="hover:shadow-md transition-shadow">
                       <Link
                         to={`/dashboard/workspaces/${task.project?.workspace ?? ""}/projects/${task.project?._id ?? ""}/tasks/${task._id}`}
                         className="block"
                       >
-                        <h3 className="font-medium ml-4">{task.title}</h3> {/* Décalage ajouté ici */}
-                        <p className="text-sm text-muted-foreground line-clamp-3 ml-4">{task.description || "Pas de description"}</p> {/* Décalage ajouté ici */}
+                        <h3 className="font-medium ml-4">{task.title}</h3>
+                        <p className="text-sm text-muted-foreground line-clamp-3 ml-4">
+                          {task.description || "Pas de description"}
+                        </p>
 
-                        <div className="flex items-center mt-2 gap-2 ml-4"> {/* Décalage ajouté ici */}
+                        <div className="flex items-center mt-2 gap-2 ml-4">
                           <Badge
                             variant={
                               task.priority === "High"
@@ -328,10 +343,10 @@ const MyTasks = () => {
                           </Badge>
 
                           {task.dueDate && (
-                            <span className="text-sm text-amber-600 font-medium ml-4">
-                              {format(new Date(task.dueDate), "EEEE d MMMM yyyy", {
-                                locale: fr,
-                              })}
+                            <span
+                              className={`text-sm font-medium ml-4 ${getPriorityColor(task.priority ?? "Low")}`}
+                            >
+                              {format(new Date(task.dueDate), "EEEE d MMMM yyyy", { locale: fr })}
                             </span>
                           )}
                         </div>
@@ -349,7 +364,6 @@ const MyTasks = () => {
             ))}
           </div>
         </TabsContent>
-
       </Tabs>
     </div>
   );

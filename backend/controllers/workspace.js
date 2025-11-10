@@ -53,7 +53,7 @@ const getWorkspaceDetails = async (req, res) => {
   try {
     const { workspaceId } = req.params;
     const workspace = await Workspace.findById({ _id: workspaceId, "members.user": req.user._id, }).populate("members.user",
-      "name email profilePicture");
+      "name email profil");
 
     if (!workspace) {
       return res.status(404).json({ message: "Espace de travail non trouvé" });
@@ -69,7 +69,7 @@ const getWorkspaceProjects = async (req, res) => {
   try {
     const { workspaceId } = req.params;
     const workspace = await Workspace.findOne({ _id: workspaceId, "members.user": req.user._id, }).populate("members.user",
-      "name email profilePicture");
+      "name email profil");
     if (!workspace) {
       return res.status(404).json({ message: "Espace de travail non trouvé" });
     }

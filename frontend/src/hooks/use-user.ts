@@ -1,6 +1,5 @@
-// use-user.ts
 import { useMutation, useQuery, type QueryKey } from "@tanstack/react-query";
-import { fetchData, updateFormData } from "../libs/fetch-utils"; // on va le créer juste après
+import { fetchData, updateFormData } from "../libs/fetch-utils";
 import type { ChangePasswordFormData, ProfileFormData } from "../user/profile";
 
 const queryKey: QueryKey = ["user"];
@@ -27,7 +26,6 @@ export const useChangePassword = () => {
   });
 };
 
-// Fitahiana (ajout d'un envoi formdata)
 export const useUpdateUserProfile = () => {
   return useMutation({
     mutationFn: (data: FormData) => updateFormData("/users/profile", data),

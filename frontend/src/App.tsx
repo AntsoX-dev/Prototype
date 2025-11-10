@@ -15,12 +15,14 @@ import Members from "./dashboard/members";
 import WorkspaceInvite from "./dashboard/workspaces/workspace-invite";
 import UserLayout from "./user/user-layout";
 import UserProfile from "./user/profile";
-
+import LandingPage from './components/LandingPage'; // Assurez-vous que le chemin d'importation est correct
 
 function App() {
   return (
     <Routes>
-      <Route path="/" element={<Navigate to="/signin" replace />} />
+      {/* Route pour la LandingPage */}
+      <Route path="/" element={<LandingPage />} />
+
       <Route path="/signin" element={<SignIn />} />
       <Route path="/signup" element={<SignUp />} />
       <Route path="/mdpoublie" element={<MdpOublie />} />

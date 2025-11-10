@@ -1,11 +1,12 @@
 export interface Utilisateur {
+  user: any;
   _id: string;
   email: string;
   name: string;
   created: Date;
   isEmailVerified: boolean;
   updated: Date;
-  profilePictureUrl?: string;
+  profil?: string;
 }
 
 export interface AuthContextType {
@@ -110,7 +111,7 @@ export type ResourceType =
   | "Project"
   | "Workspace"
   | "Comment"
-  | "User";
+  | "Utilisateur";
 
 export type ActionType =
   | "created_task"

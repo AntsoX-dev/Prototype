@@ -11,7 +11,7 @@ export const Watchers = ({ watchers }: { watchers: Utilisateur[] }) => {
                     watchers.map((watcher) => (
                         <div key={watcher._id} className="flex items-center gap-2">
                             <Avatar className="size-6">
-                                <AvatarImage src={watcher.profilePictureUrl} />
+                                <AvatarImage src={watcher.profil} />
                                 <AvatarFallback>{watcher.name.charAt(0)}</AvatarFallback>
                             </Avatar>
 

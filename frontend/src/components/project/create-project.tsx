@@ -18,6 +18,25 @@ import { Checkbox } from "../ui/checkbox";
 import { UseCreateProject } from "../../hooks/use-project";
 import { toast } from "sonner";
 
+const translateRole = (role: string | undefined): string => {
+    switch (role) {
+        case 'admin':
+            return 'Administrateur';
+        case 'member':
+            return 'Membre';
+        case 'owner':
+            return 'Propriétaire';
+        case 'viewer':
+            return 'Observateur';
+        case 'contributor':
+            return 'Contributeur';
+        case 'manager':
+            return 'Responsable';
+        default:
+            return role || '';
+    }
+};
+
 
 interface CreateProjectDialogProps {
     isOpen: boolean;
@@ -245,20 +264,34 @@ export const CreateProjectDialog = ({
                                         <FormControl>
                                             <Popover>
                                                 <PopoverTrigger asChild>
-                                                    <Button variant={"outline"}
-                                                        className="w-full justify-start text-left font-normal min-h-11">
+                                                    <Button
+                                                        variant={"outline"}
+                                                        className="w-full justify-start text-left font-normal min-h-11"
+                                                    >
                                                         {
-                                                            selectedMembers.length === 0 ? <span className="text-muted-foreground">Sélectionnez un membre</span> : (
+                                                            selectedMembers.length === 0 ? (
+                                                                <span className="text-muted-foreground">Sélectionnez les membres</span>
+                                                            ) : (
                                                                 selectedMembers.length <= 2 ? (
-                                                                    selectedMembers.map((m) => {
+                                                                    selectedMembers.map((m, index) => {
                                                                         const member = workspaceMembers.find((wm) => wm.user._id === m.user);
-
-                                                                        return `${member?.user.name} (${member?.role})`;
+                                                                        if (member) {
+                                                                            return (
+                                                                                <span key={index}>
+                                                                                    {`${member.user.name} (${translateRole(m.role)})`}
+                                                                                    {index < selectedMembers.length - 1 && ", "}
+                                                                                </span>
+                                                                            );
+                                                                        }
+                                                                        return null;
                                                                     })
-                                                                ) : (`${selectedMembers.length} members selected`)
+                                                                ) : (
+                                                                    `${selectedMembers.length} membres sélectionnés`
+                                                                )
                                                             )
                                                         }
                                                     </Button>
+
                                                 </PopoverTrigger>
                                                 <PopoverContent className="w-full max-w-60 overflow-y-auto" align="start">
                                                     <div className="flex flex-col gap-2">
@@ -273,44 +306,42 @@ export const CreateProjectDialog = ({
                                                                             checked={!!selectedMember}
                                                                             onCheckedChange={(checked) => {
                                                                                 if (checked) {
-                                                                                    field.onChange([...selectedMembers, { user: member.user._id, role: "contributor" }])
+                                                                                    field.onChange([
+                                                                                        ...selectedMembers,
+                                                                                        { user: member.user._id, role: member.role }
+                                                                                    ]);
                                                                                 } else {
-                                                                                    field.onChange(selectedMembers.filter((m) => m.user !== member.user._id))
+                                                                                    field.onChange(selectedMembers.filter((m) => m.user !== member.user._id));
                                                                                 }
                                                                             }}
                                                                             id={`member-${member.user._id}`}
                                                                         />
+
                                                                         <span className="truncate flex-1">
                                                                             {member.user.name}
                                                                         </span>
 
                                                                         {
                                                                             selectedMember && (
-                                                                                <Select value={selectedMember.role} onValueChange={(role) => {
-                                                                                    field.onChange(
-                                                                                        selectedMembers.map((m) => m.user === member.user._id ? {
-                                                                                            ...m, role: role as
-                                                                                                "contributor" |
-                                                                                                "manager" |
-                                                                                                "viewer"
-                                                                                        } : m)
-                                                                                    )
+                                                                                <Select value={selectedMember?.role} onValueChange={(role) => {
+                                                                                    const updatedMembers = selectedMembers.map((m) =>
+                                                                                        m.user === member.user._id
+                                                                                            ? { ...m, role: role as "contributor" | "manager" | "viewer" }
+                                                                                            : m
+                                                                                    );
+
+                                                                                    field.onChange(updatedMembers);
                                                                                 }}>
                                                                                     <SelectTrigger>
                                                                                         <SelectValue placeholder="Sélectionnez le rôle" />
                                                                                     </SelectTrigger>
                                                                                     <SelectContent>
-                                                                                        <SelectItem value="manager">
-                                                                                            Responsable
-                                                                                        </SelectItem>
-                                                                                        <SelectItem value="contributor">
-                                                                                            Participant
-                                                                                        </SelectItem>
-                                                                                        <SelectItem value="viewer">
-                                                                                            Lecteur
-                                                                                        </SelectItem>
+                                                                                        <SelectItem value="manager">Responsable</SelectItem>
+                                                                                        <SelectItem value="contributor">Contributeur</SelectItem>
+                                                                                        <SelectItem value="viewer">Observateur</SelectItem>
                                                                                     </SelectContent>
                                                                                 </Select>
+
                                                                             )
                                                                         }
                                                                     </div>

@@ -78,10 +78,10 @@ const getUserProfile = async (req, res) => {
       _id: user._id,
       email: user.email,
       name: user.name,
-      created: user.createdAt, 
+      created: user.createdAt,
       isEmailVerified: user.isEmailVerified,
-      updated: user.updatedAt, 
-      profilePictureUrl: user.profil, 
+      updated: user.updatedAt,
+      profilePictureUrl: user.profil,
     });
   } catch (error) {
     console.error(

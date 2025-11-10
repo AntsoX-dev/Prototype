@@ -5,12 +5,10 @@ import mongoose from "mongoose";
 import morgan from "morgan";
 
 import routes from "./routes/index.js"
-import bodyParser from 'body-parser'
 
 dotenv.config();
 
 const app = express();
-
 
 //CORS frontend + tests
 app.use(
@@ -23,8 +21,6 @@ app.use(
 
 
 app.use(morgan("dev"));
-app.use(bodyParser.json({ limit: '50mb' }));
-app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
 app.use(express.json());
 
 // Vérifier que URI est bien lu

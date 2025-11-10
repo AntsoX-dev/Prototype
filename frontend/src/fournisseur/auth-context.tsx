@@ -25,45 +25,70 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     const checkAuth = async () => {
-      setIsLoading(true);
-      const userInfo = localStorage.getItem("utilisateur");
-      if (userInfo) {
-        setUtilisateur(JSON.parse(userInfo));
-        setIsAuthenticated(true);
-      } else {
+      try {
+        setIsLoading(true);
+        const userInfo = localStorage.getItem("utilisateur");
+        const token = localStorage.getItem("token");
+
+        if (userInfo && token) {
+          setUtilisateur(JSON.parse(userInfo));
+          setIsAuthenticated(true);
+        } else {
+          setIsAuthenticated(false);
+          if (!isPublicRoute && currentPath !== "/signin") {
+            navigate("/signin");
+          }
+        }
+      } catch (err) {
+        console.error("Erreur lors de la vérification de l'authentification :", err);
         setIsAuthenticated(false);
         if (!isPublicRoute) navigate("/signin");
+      } finally {
+        setIsLoading(false);
       }
-      setIsLoading(false);
     };
 
     checkAuth();
-  }, [isPublicRoute, navigate]);
+  }, [isPublicRoute, navigate, currentPath]);
 
   useEffect(() => {
-    const handleLogout = () => {
+    const handleForceLogout = () => {
+      console.warn("⚠️ Token invalide ou expiré — déconnexion forcée");
       logout();
       navigate("/signin");
     };
-    window.addEventListener("force-logout", handleLogout);
-    return () => window.removeEventListener("force-logout", handleLogout);
+
+    window.addEventListener("force-logout", handleForceLogout);
+    return () => window.removeEventListener("force-logout", handleForceLogout);
   }, [navigate]);
 
   const login = (data: any) => {
-  localStorage.setItem("token", data.token);
-  localStorage.setItem("utilisateur", JSON.stringify(data.utilisateur));
-  setUtilisateur(data.utilisateur);
-  setIsAuthenticated(true);
-  navigate("/dashboard");
+    try {
+      if (!data?.token || !data?.utilisateur) {
+        throw new Error("Les données de connexion sont incomplètes.");
+      }
+
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("utilisateur", JSON.stringify(data.utilisateur));
+      setUtilisateur(data.utilisateur);
+      setIsAuthenticated(true);
+      navigate("/dashboard");
+    } catch (error) {
+      console.error("Erreur lors de la connexion :", error);
+    }
   };
 
-
+  // 🚪 Déconnexion
   const logout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("utilisateur");
-    setUtilisateur(null);
-    setIsAuthenticated(false);
-    queryClient.clear();
+    try {
+      localStorage.removeItem("token");
+      localStorage.removeItem("utilisateur");
+      setUtilisateur(null);
+      setIsAuthenticated(false);
+      queryClient.clear();
+    } catch (error) {
+      console.error("Erreur lors de la déconnexion :", error);
+    }
   };
 
   const values = {
@@ -77,6 +102,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   return <AuthContext.Provider value={values}>{children}</AuthContext.Provider>;
 };
 
+// ✅ Hook d’accès au contexte
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {

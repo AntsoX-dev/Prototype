@@ -99,7 +99,7 @@ const Members = () => {
                                     >
                                         <div className="flex items-center space-x-4">
                                             <Avatar className="bg-gray-500">
-                                                <AvatarImage src={member.user.profilePictureUrl} />
+                                                <AvatarImage src={member.user.profil} />
                                                 <AvatarFallback>
                                                     {member.user.name.charAt(0)}
                                                 </AvatarFallback>
@@ -115,9 +115,13 @@ const Members = () => {
                                         <div className="flex items-center space-x-1 ml-11 md:ml-0">
                                             <Badge
                                                 variant={
-                                                    ["admin", "owner"].includes(member.role)
-                                                        ? "destructive"
-                                                        : "secondary"
+                                                    member.role === "admin"
+                                                        ? "admin"  // Utilise la variante 'admin'
+                                                        : member.role === "owner"
+                                                            ? "owner"  // Utilise la variante 'owner'
+                                                            : member.role === "member"
+                                                                ? "member"  // Utilise la variante 'member'
+                                                                : "guest"   // Utilise la variante 'guest'
                                                 }
                                                 className="capitalize"
                                             >
@@ -146,7 +150,7 @@ const Members = () => {
                             <Card key={member.user._id}>
                                 <CardContent className="p-6 flex flex-col items-center text-center">
                                     <Avatar className="bg-gray-500 size-20 mb-4">
-                                        <AvatarImage src={member.user.profilePictureUrl} />
+                                        <AvatarImage src={member.user.profil} />
                                         <AvatarFallback className="uppercase">
                                             {member.user.name.substring(0, 2)}
                                         </AvatarFallback>
@@ -162,10 +166,15 @@ const Members = () => {
 
                                     <Badge
                                         variant={
-                                            ["admin", "owner"].includes(member.role)
-                                                ? "destructive"
-                                                : "secondary"
+                                            member.role === "admin"
+                                                ? "admin"  // Utilise la variante 'admin'
+                                                : member.role === "owner"
+                                                    ? "owner"  // Utilise la variante 'owner'
+                                                    : member.role === "member"
+                                                        ? "member"  // Utilise la variante 'member'
+                                                        : "guest"   // Utilise la variante 'guest'
                                         }
+                                        className="capitalize"
                                     >
                                         {member.role === "owner"
                                             ? "Propriétaire"

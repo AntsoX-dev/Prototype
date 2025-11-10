@@ -65,8 +65,8 @@ const getTaskById = async (req, res) => {
         const { taskId } = req.params;
 
         const task = await Task.findById(taskId)
-            .populate("assignees", "name profilePicture")
-            .populate("watchers", "name profilePicture");
+            .populate("assignees", "name profil")
+            .populate("watchers", "name profil");
 
         if (!task) {
             return res.status(404).json({
@@ -76,7 +76,7 @@ const getTaskById = async (req, res) => {
 
         const project = await Project.findById(task.project).populate(
             "members.user",
-            "name profilePicture"
+            "name profil"
         );
 
         res.status(200).json({ task, project });
@@ -438,7 +438,7 @@ const getActivityByResourceId = async (req, res) => {
         const { resourceId } = req.params;
 
         const activity = await ActivityLog.find({ resourceId })
-            .populate("user", "name profilePicture")
+            .populate("user", "name profil")
             .sort({ createdAt: -1 });
 
         res.status(200).json(activity);
@@ -455,7 +455,7 @@ const getCommentsByTaskId = async (req, res) => {
         const { taskId } = req.params;
 
         const comments = await Comment.find({ task: taskId })
-            .populate("author", "name profilePicture")
+            .populate("author", "name profil")
             .sort({ createdAt: -1 });
 
         res.status(200).json(comments);
@@ -644,7 +644,6 @@ const getMyTasks = async (req, res) => {
     }
 };
 
-// controllers/task.js (ajoute ceci)
 const getTaskTrends = async (req, res) => {
     try {
         const now = new Date();

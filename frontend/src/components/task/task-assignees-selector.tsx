@@ -82,7 +82,7 @@ export const TaskAssigneesSelector = ({
                                 className="flex items-center bg-gray-100 rounded px-2 py-1"
                             >
                                 <Avatar className="size-6 mr-1">
-                                    <AvatarImage src={m.user.profilePictureUrl} />
+                                    <AvatarImage src={m.user.profil} />
                                     <AvatarFallback>{m.user.name.charAt(0)}</AvatarFallback>
                                 </Avatar>
                                 <span className="text-xs text-muted-foreground">
@@ -101,7 +101,7 @@ export const TaskAssigneesSelector = ({
                 >
                     {selectedIds.length === 0
                         ? "Select assignees"
-                        : `${selectedIds.length} selected`}
+                        : `${selectedIds.length} sélectionné`}
                 </button>
 
                 {dropDownOpen && (
@@ -133,7 +133,7 @@ export const TaskAssigneesSelector = ({
                                 />
 
                                 <Avatar className="size-6 mr-2">
-                                    <AvatarImage src={m.user.profilePictureUrl} />
+                                    <AvatarImage src={m.user.profil} />
                                     <AvatarFallback>{m.user.name.charAt(0)}</AvatarFallback>
                                 </Avatar>
 

@@ -348,17 +348,19 @@ const TaskCard = ({ task, onClick }: { task: Task; onClick: () => void }) => {
                     <div className="flex items-center gap-2">
                         {task.assignees && task.assignees.length > 0 && (
                             <div className="flex -space-x-2">
-                                {task.assignees.slice(0, 5).map((member) => (
-                                    <Avatar
-                                        key={member._id}
-                                        className="relative size-8 bg-gray-700 rounded-full border-2 border-background overflow-hidden"
-                                        title={member.name}
-                                    >
-                                        <AvatarImage src={member.profilePictureUrl} />
-                                        <AvatarFallback>{member.name.charAt(0)}</AvatarFallback>
-                                    </Avatar>
-                                ))}
-
+                                {task.assignees.slice(0, 5).map((member) => {
+                                    console.log("Assigné:", member); // Afficher les données de chaque assigné
+                                    return (
+                                        <Avatar
+                                            key={member._id}
+                                            className="relative size-8 bg-gray-700 rounded-full border-2 border-background overflow-hidden"
+                                            title={member.name}
+                                        >
+                                            <AvatarImage src={member.profil} />
+                                            <AvatarFallback>{member.name.charAt(0)}</AvatarFallback>
+                                        </Avatar>
+                                    );
+                                })}
                                 {task.assignees.length > 5 && (
                                     <span className="text-xs text-muted-foreground">
                                         + {task.assignees.length - 5}
@@ -366,6 +368,7 @@ const TaskCard = ({ task, onClick }: { task: Task; onClick: () => void }) => {
                                 )}
                             </div>
                         )}
+
                     </div>
 
                     {task.dueDate && (

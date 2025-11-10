@@ -97,7 +97,7 @@ export const CreateTaskDialog = ({
                                     name="title"
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel>Title</FormLabel>
+                                            <FormLabel>Titre</FormLabel>
                                             <FormControl>
                                                 <Input {...field} placeholder="Entrez le titre de la tâche" />
                                             </FormControl>

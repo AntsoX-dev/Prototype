@@ -142,7 +142,7 @@ export const verifyEmail = async (req, res) => {
     // 2) Vérifier expiration
     if (verification.expiresAt < new Date()) {
       console.log("verifyEmail: token expired for token", token);
-      await Verification.findByIdAndDelete(verification._id).catch(() => {});
+      await Verification.findByIdAndDelete(verification._id).catch(() => { });
       return res.status(401).json({ message: "Lien expiré, veuillez vous réinscrire." });
     }
 
@@ -171,7 +171,7 @@ export const verifyEmail = async (req, res) => {
 
     if (utilisateur.isEmailVerified) {
       // supprimer la verification si elle existait encore
-      await Verification.findByIdAndDelete(verification._id).catch(() => {});
+      await Verification.findByIdAndDelete(verification._id).catch(() => { });
       return res.status(200).json({ message: "E-mail déjà vérifié" });
     }
 
@@ -179,7 +179,7 @@ export const verifyEmail = async (req, res) => {
     await utilisateur.save();
 
     // suppression du token dans la collection verification
-    await Verification.findByIdAndDelete(verification._id).catch(() => {});
+    await Verification.findByIdAndDelete(verification._id).catch(() => { });
 
     console.log("verifyEmail: success for user", utilisateur._id);
     return res.status(200).json({ message: "E-mail vérifié avec succès !" });

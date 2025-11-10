@@ -62,7 +62,7 @@ export const CommentSection = ({
                     comments.map((comment) => (
                         <div key={comment._id} className="flex gap-4 py-2">
                             <Avatar className="size-8">
-                                <AvatarImage src={comment.author.profilePictureUrl} />
+                                <AvatarImage src={comment.author.profil} />
                                 <AvatarFallback>{comment.author.name.charAt(0)}</AvatarFallback>
                             </Avatar>
 
