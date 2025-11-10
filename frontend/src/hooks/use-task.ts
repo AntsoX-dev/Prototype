@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { fetchData, postData, updateData } from "../libs/fetch-utils";
+import { fetchData, postData, updateData, postFormData } from "../libs/fetch-utils";
 import type { CreateTaskFormData } from "../components/task/create-task-dialog";
 import type { TaskPriority, TaskStatus } from "../types";
 
@@ -165,6 +165,24 @@ export const useAddCommentMutation = () => {
       });
       queryClient.invalidateQueries({
         queryKey: ["task-activity", data.task],
+      });
+    },
+  });
+};
+
+export const useAddAttachmentMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (data: { taskId: string; formData: FormData }) =>
+      postFormData(`/tasks/${data.taskId}/add-attachment`, data.formData), // Utilisation de postFormData
+    onSuccess: (data: any) => {
+      // data est la tâche mise à jour
+      queryClient.invalidateQueries({
+        queryKey: ["task", data._id], // Invalider la tâche pour rafraîchir les pièces jointes
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["task-activity", data._id], // Invalider l'activité
       });
     },
   });

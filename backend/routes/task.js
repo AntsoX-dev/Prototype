@@ -3,26 +3,43 @@ import express from "express";
 import { z } from "zod";
 import { validateRequest } from "zod-express-middleware";
 import { taskSchema } from "../libs/validate_schema.js";
+import uploadAttachment from "../middleware/upload-attachment.js";
 import {
-    achievedTask,
-    addComment,
-    addSubTask,
-    createTask,
-    getActivityByResourceId,
-    getCommentsByTaskId,
-    getMyTasks,
-    getTaskById,
-    updateSubTask,
-    updateTaskAssignees,
-    updateTaskDescription,
-    updateTaskPriority,
-    updateTaskStatus,
-    updateTaskTitle,
-    watchTask,
+  achievedTask,
+  addComment,
+  addSubTask,
+  createTask,
+  getActivityByResourceId,
+  getCommentsByTaskId,
+  getMyTasks,
+  getTaskById,
+  updateSubTask,
+  updateTaskAssignees,
+  updateTaskDescription,
+  updateTaskPriority,
+  updateTaskStatus,
+  updateTaskTitle,
+  watchTask,
+  addAttachmentToTask,
 } from "../controllers/task.js";
 import authMiddleware from "../middleware/auth-middleware.js";
 
 const router = express.Router();
+
+router.post(
+  "/:taskId/add-attachment",
+  authMiddleware,
+  uploadAttachment, 
+  validateRequest({
+    params: z.object({
+      taskId: z.string(),
+    }),
+    body: z.object({
+      customName: z.string().min(3), 
+    }),
+  }),
+  addAttachmentToTask
+);
 
 router.post(
     "/:projectId/create-task",

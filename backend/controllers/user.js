@@ -92,7 +92,7 @@ const getUserProfile = async (req, res) => {
   }
 };
 
-// Fonction UPDATE mise à jour pour gérer l'upload
+// Fonction UPDATE pour gérer l'upload
 const updateUserProfile = async (req, res) => {
   try {
     const { name } = req.body;
@@ -112,7 +112,6 @@ const updateUserProfile = async (req, res) => {
     // 2. Gérer l'upload de l'image 
     if (file) {
       try {
-        // Uploader le buffer de Multer vers Cloudinary
         const uploadResult = await uploadToCloudinary(file.buffer);
 
         // Enregistrer l'URL sécurisée dans le champ 'profil'

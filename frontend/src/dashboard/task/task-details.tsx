@@ -16,6 +16,7 @@ import {
   useAchievedTaskMutation,
   useTaskByIdQuery,
   useWatchTaskMutation,
+  useAddAttachmentMutation,
 } from "../../hooks/use-task";
 import { useAuth } from "../../fournisseur/auth-context";
 import type { Project, Task } from "../../types";
@@ -49,13 +50,17 @@ const TaskDetails = () => {
   const navigate = useNavigate();
   const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false);
 
-  const { data, isLoading } = useTaskByIdQuery(taskId!) as {
+  const { data, isLoading, refetch } = useTaskByIdQuery(taskId!) as {
     data: {
       task: Task;
       project: Project;
     };
     isLoading: boolean;
+    refetch: () => void;
   };
+
+  const { mutate: addAttachment, isPending: isUploading } =
+    useAddAttachmentMutation();
   const { mutate: watchTask, isPending: isWatching } = useWatchTaskMutation();
   const { mutate: achievedTask, isPending: isAchieved } =
     useAchievedTaskMutation();
@@ -114,11 +119,29 @@ const TaskDetails = () => {
   };
 
   const handleAttachmentUpload = async (file: File, customName: string) => {
-    console.log("Fichier à uploader:", file);
-    console.log("Nom personnalisé:", customName);
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("customName", customName);
 
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-    toast.success(`Fichier "${customName}" traité.`);
+    return new Promise<void>((resolve, reject) => {
+      addAttachment(
+        { taskId: task._id, formData: formData },
+        {
+          onSuccess: () => {
+            toast.success(`La pièce jointe "${customName}" a été ajoutée.`);
+            setIsUploadDialogOpen(false);
+            resolve();
+          },
+          onError: (error: any) => {
+            const errorMessage =
+              error.response?.data?.message ||
+              "Erreur lors de l'ajout de la pièce jointe.";
+            toast.error(errorMessage);
+            reject(error);
+          },
+        }
+      );
+    });
   };
 
   return (
@@ -242,9 +265,10 @@ const TaskDetails = () => {
                 <button
                   className="flex gap-2 text-sm items-center justify-start text-black hover:underline underline-offset-2"
                   onClick={() => setIsUploadDialogOpen(true)}
+                  disabled={isUploading} // 4. Désactiver le bouton pendant l'upload
                 >
                   <Plus size={16} />
-                  Ajouter
+                  {isUploading ? "Envoi..." : "Ajouter"}
                 </button>
               </div>
 
@@ -263,7 +287,7 @@ const TaskDetails = () => {
                         href={attachment.fileUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-xs text-blue-600 hover:text-blue-800 underline ml-4"
+                        className="text-xs text-gray-600 underline mr-4"
                       >
                         Voir
                       </a>

@@ -4,6 +4,7 @@ import Comment from "../models/comment.js";
 import Project from "../models/project.js";
 import Task from "../models/task.js";
 import Workspace from "../models/workspace.js";
+import { uploadFileToCloudinary } from "../libs/cloudinary.js";
 
 const createTask = async (req, res) => {
     try {
@@ -690,23 +691,90 @@ const getTaskTrends = async (req, res) => {
     }
 };
 
+const addAttachmentToTask = async (req, res) => {
+  try {
+    const { taskId } = req.params;
+    const { customName } = req.body;
+    const file = req.file;
+
+    if (!file) {
+      return res
+        .status(400)
+        .json({ message: "Aucun fichier n'a été uploadé." });
+    }
+
+    if (!customName) {
+      return res
+        .status(400)
+        .json({ message: "Le nom personnalisé est requis." });
+    }
+
+    const task = await Task.findById(taskId);
+
+    if (!task) {
+      return res.status(404).json({ message: "Tâche non trouvée" });
+    }
+
+    const project = await Project.findById(task.project);
+    if (!project) {
+      return res.status(404).json({ message: "Projet non trouvé" });
+    }
+    const isMember = project.members.some(
+      (member) => member.user.toString() === req.user._id.toString()
+    );
+    if (!isMember) {
+      return res
+        .status(403)
+        .json({ message: "Vous n'êtes pas membre de ce projet" });
+    }
+
+    const uploadResult = await uploadFileToCloudinary(
+      file.buffer,
+      "task-attachments" 
+    );
+
+    const newAttachment = {
+      fileName: customName, 
+      fileUrl: uploadResult.secure_url,
+      fileType: file.mimetype,
+      fileSize: file.size,
+      uploadedBy: req.user._id,
+    };
+
+    task.attachments.push(newAttachment);
+    await task.save();
+
+    await recordActivity(req.user._id, "added_attachment", "Task", taskId, {
+      description: `a ajouté la pièce jointe : ${customName}`,
+    });
+
+    res.status(200).json(task);
+  } catch (error) {
+    console.log(error);
+    if (error.message.includes("Format non supporté")) {
+      return res.status(400).json({ message: error.message });
+    }
+    return res.status(500).json({ message: "Erreur interne du serveur" });
+  }
+};
+
 
 export {
-    createTask,
-    getTaskById,
-    updateTaskTitle,
-    updateTaskDescription,
-    updateTaskStatus,
-    updateTaskAssignees,
-    updateTaskPriority,
-    addSubTask,
-    updateSubTask,
-    getActivityByResourceId,
-    getCommentsByTaskId,
-    addComment,
-    watchTask,
-    achievedTask,
-    getMyTasks,
-    getTaskTrends,
-
+  createTask,
+  getTaskById,
+  updateTaskTitle,
+  updateTaskDescription,
+  updateTaskStatus,
+  updateTaskAssignees,
+  updateTaskPriority,
+  addSubTask,
+  updateSubTask,
+  getActivityByResourceId,
+  getCommentsByTaskId,
+  addComment,
+  watchTask,
+  achievedTask,
+  getMyTasks,
+  getTaskTrends,
+  addAttachmentToTask,
 };

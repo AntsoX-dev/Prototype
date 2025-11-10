@@ -58,14 +58,31 @@ const deleteData = async <T>(path: string): Promise<T> => {
     return response.data;
 };
 
-const updateFormData = async <T>(
-    path: string,
-    formData: FormData
+const postFormData = async <T>(
+  path: string,
+  formData: FormData
 ): Promise<T> => {
-    const response = await api.put(path, formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-    });
-    return response.data;
+  const response = await api.post(path, formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+  return response.data;
 };
 
-export { postData, fetchData, updateData, deleteData, updateFormData };
+const updateFormData = async <T>(
+  path: string,
+  formData: FormData
+): Promise<T> => {
+  const response = await api.put(path, formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+  return response.data;
+};
+
+export {
+  postData,
+  fetchData,
+  updateData,
+  deleteData,
+  updateFormData,
+  postFormData,
+};
