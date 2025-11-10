@@ -21,24 +21,40 @@ import {
   updateTaskTitle,
   watchTask,
   addAttachmentToTask,
+  addLinkToTask,
 } from "../controllers/task.js";
 import authMiddleware from "../middleware/auth-middleware.js";
 
 const router = express.Router();
 
 router.post(
-  "/:taskId/add-attachment",
+  "/:taskId/add-file-attachment", 
   authMiddleware,
-  uploadAttachment, 
+  uploadAttachment,
   validateRequest({
     params: z.object({
       taskId: z.string(),
     }),
     body: z.object({
-      customName: z.string().min(3), 
+      customName: z.string().min(3),
     }),
   }),
-  addAttachmentToTask
+  addAttachmentToTask 
+);
+
+router.post(
+  "/:taskId/add-link-attachment", 
+  authMiddleware,
+  validateRequest({
+    params: z.object({
+      taskId: z.string(),
+    }),
+    body: z.object({
+      customName: z.string().min(3),
+      fileUrl: z.string().url(), 
+    }),
+  }),
+  addLinkToTask 
 );
 
 router.post(

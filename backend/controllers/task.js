@@ -758,6 +758,58 @@ const addAttachmentToTask = async (req, res) => {
   }
 };
 
+const addLinkToTask = async (req, res) => {
+  try {
+    const { taskId } = req.params;
+    const { customName, fileUrl } = req.body;
+
+    if (!customName || !fileUrl) {
+      return res
+        .status(400)
+        .json({ message: "Le nom personnalisé et l'URL sont requis." });
+    }
+
+    const task = await Task.findById(taskId);
+
+    if (!task) {
+      return res.status(404).json({ message: "Tâche non trouvée" });
+    }
+
+    const project = await Project.findById(task.project);
+    if (!project) {
+      return res.status(404).json({ message: "Projet non trouvé" });
+    }
+    const isMember = project.members.some(
+      (member) => member.user.toString() === req.user._id.toString()
+    );
+    if (!isMember) {
+      return res
+        .status(403)
+        .json({ message: "Vous n'êtes pas membre de ce projet" });
+    }
+
+    const newAttachment = {
+      fileName: customName,
+      fileUrl: fileUrl, 
+      fileType: "link/url", 
+      fileSize: 0,
+      uploadedBy: req.user._id,
+    };
+
+    task.attachments.push(newAttachment);
+    await task.save();
+
+    await recordActivity(req.user._id, "added_attachment", "Task", taskId, {
+      description: `a ajouté le lien : ${customName}`,
+    });
+
+    res.status(200).json(task);
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ message: "Erreur interne du serveur" });
+  }
+};
+
 
 export {
   createTask,
@@ -777,4 +829,5 @@ export {
   getMyTasks,
   getTaskTrends,
   addAttachmentToTask,
+  addLinkToTask
 };

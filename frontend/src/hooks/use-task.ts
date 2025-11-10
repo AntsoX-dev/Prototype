@@ -174,16 +174,23 @@ export const useAddAttachmentMutation = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (data: { taskId: string; formData: FormData }) =>
-      postFormData(`/tasks/${data.taskId}/add-attachment`, data.formData), // Utilisation de postFormData
+    mutationFn: (data: {
+      taskId: string;
+      formData?: FormData;
+      payload?: { customName: string; fileUrl: string };
+    }) => {
+      const { taskId, formData, payload } = data;
+
+      if (formData) {
+        return postFormData(`/tasks/${taskId}/add-file-attachment`, formData); // ⬅️ Route de fichier
+      } else if (payload) {
+        return postData(`/tasks/${taskId}/add-link-attachment`, payload); // ⬅️ Route de lien
+      }
+      return Promise.reject(new Error("Données de pièce jointe manquantes."));
+    },
     onSuccess: (data: any) => {
-      // data est la tâche mise à jour
-      queryClient.invalidateQueries({
-        queryKey: ["task", data._id], // Invalider la tâche pour rafraîchir les pièces jointes
-      });
-      queryClient.invalidateQueries({
-        queryKey: ["task-activity", data._id], // Invalider l'activité
-      });
+      queryClient.invalidateQueries({ queryKey: ["task", data._id] });
+      queryClient.invalidateQueries({ queryKey: ["task-activity", data._id] });
     },
   });
 };

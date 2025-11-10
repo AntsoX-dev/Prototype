@@ -11,6 +11,7 @@ import { TaskTitle } from "../../components/task/task-title";
 import { Watchers } from "../../components/task/watchers";
 import { Badge } from "../../components/ui/badge";
 import { Button } from "../../components/button";
+import { AddLinkDialog } from "../../components/ui/AddLinkDialog";
 import { UploadAttachmentDialog } from "../../components/ui/UploadAttachmentDialog";
 import {
   useAchievedTaskMutation,
@@ -21,11 +22,29 @@ import {
 import { useAuth } from "../../fournisseur/auth-context";
 import type { Project, Task } from "../../types";
 import { format, formatDistanceToNow } from "date-fns";
-import { Eye, EyeOff, Paperclip, Plus } from "lucide-react";
+import { Eye, EyeOff, File, Link, Paperclip, Plus } from "lucide-react";
 import { useNavigate, useParams } from "react-router";
 import { toast } from "sonner";
 import { fr } from "date-fns/locale";
 import { useState } from "react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@radix-ui/react-dropdown-menu";
+
+// Style dropdown
+const buttonClasses =
+  "flex gap-2 text-sm items-center justify-start text-black hover:underline underline-offset-2 hover:border-1 hover:border-gray-300 px-2 py-1.5 rounded-md transition-colors";
+
+const contentClasses =
+  "z-50 min-w-[8rem] overflow-hidden rounded-md border bg-popover p-2 text-popover-foreground shadow-md data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2";
+
+const itemClasses =
+  "relative flex cursor-default select-none items-center justify-start gap-2 rounded-sm px-2 py-1.5 text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50";
+
+// Fin style dropdown
 
 const translatePriority = (priority?: "Low" | "Medium" | "High") => {
   switch (priority) {
@@ -48,6 +67,7 @@ const TaskDetails = () => {
     workspaceId: string;
   }>();
   const navigate = useNavigate();
+  const [isLinkDialogOpen, setIsLinkDialogOpen] = useState(false);
   const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false);
 
   const { data, isLoading, refetch } = useTaskByIdQuery(taskId!) as {
@@ -125,7 +145,7 @@ const TaskDetails = () => {
 
     return new Promise<void>((resolve, reject) => {
       addAttachment(
-        { taskId: task._id, formData: formData },
+        { taskId: task._id, formData: formData } as any, // Cast pour éviter les erreurs de type si `formData` n'est pas l'unique type attendu
         {
           onSuccess: () => {
             toast.success(`La pièce jointe "${customName}" a été ajoutée.`);
@@ -136,6 +156,33 @@ const TaskDetails = () => {
             const errorMessage =
               error.response?.data?.message ||
               "Erreur lors de l'ajout de la pièce jointe.";
+            toast.error(errorMessage);
+            reject(error);
+          },
+        }
+      );
+    });
+  };
+
+  const handleLinkAddition = async (url: string, customName: string) => {
+    const linkPayload = {
+      customName,
+      fileUrl: url, 
+    };
+
+    return new Promise<void>((resolve, reject) => {
+      addAttachment(
+        { taskId: task._id, payload: linkPayload } as any, 
+        {
+          onSuccess: () => {
+            toast.success(`Le lien "${customName}" a été ajouté.`);
+            setIsLinkDialogOpen(false);
+            resolve();
+          },
+          onError: (error: any) => {
+            const errorMessage =
+              error.response?.data?.message ||
+              "Erreur lors de l'ajout du lien.";
             toast.error(errorMessage);
             reject(error);
           },
@@ -262,14 +309,33 @@ const TaskDetails = () => {
                   <Paperclip size={16} />
                   Pièces jointes ({task.attachments?.length || 0}){" "}
                 </h3>
-                <button
-                  className="flex gap-2 text-sm items-center justify-start text-black hover:underline underline-offset-2"
-                  onClick={() => setIsUploadDialogOpen(true)}
-                  disabled={isUploading} // 4. Désactiver le bouton pendant l'upload
-                >
-                  <Plus size={16} />
-                  {isUploading ? "Envoi..." : "Ajouter"}
-                </button>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <button className={buttonClasses}>
+                      <Plus size={16} />
+                      {isUploading ? "Envoi..." : "Ajouter"}
+                    </button>
+                  </DropdownMenuTrigger>
+
+                  <DropdownMenuContent className={contentClasses}>
+                    <DropdownMenuItem
+                      className={itemClasses}
+                      onClick={() => setIsUploadDialogOpen(true)}
+                      disabled={isUploading}
+                    >
+                      <File size={14} />
+                      <span>Ajouter un fichier</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      className={itemClasses}
+                      onClick={() => setIsLinkDialogOpen(true)}
+                      disabled={isUploading}
+                    >
+                      <Link size={14} />
+                      <span>Ajouter un lien</span>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
 
               {/* Affichage des pièces jointes existantes */}
@@ -312,10 +378,17 @@ const TaskDetails = () => {
           <TaskActivity resourceId={task._id} />
         </div>
       </div>
+
       <UploadAttachmentDialog
         isOpen={isUploadDialogOpen}
         onOpenChange={setIsUploadDialogOpen}
         onUpload={handleAttachmentUpload}
+      />
+
+      <AddLinkDialog
+        isOpen={isLinkDialogOpen}
+        onOpenChange={setIsLinkDialogOpen}
+        onAddLink={handleLinkAddition}
       />
     </div>
   );
