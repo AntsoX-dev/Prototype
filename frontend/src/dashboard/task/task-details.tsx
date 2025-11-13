@@ -167,12 +167,12 @@ const TaskDetails = () => {
   const handleLinkAddition = async (url: string, customName: string) => {
     const linkPayload = {
       customName,
-      fileUrl: url, 
+      fileUrl: url,
     };
 
     return new Promise<void>((resolve, reject) => {
       addAttachment(
-        { taskId: task._id, payload: linkPayload } as any, 
+        { taskId: task._id, payload: linkPayload } as any,
         {
           onSuccess: () => {
             toast.success(`Le lien "${customName}" a été ajouté.`);
@@ -249,8 +249,8 @@ const TaskDetails = () => {
                     task.priority === "High"
                       ? "destructive"
                       : task.priority === "Medium"
-                      ? "default"
-                      : "outline"
+                        ? "default"
+                        : "outline"
                   }
                   className="mb-2 capitalize"
                 >
@@ -274,7 +274,7 @@ const TaskDetails = () => {
                 <Button
                   variant={"destructive"}
                   size="sm"
-                  onClick={() => {}}
+                  onClick={() => { }}
                   className="hidden md:block"
                 >
                   Supprimer la tâche

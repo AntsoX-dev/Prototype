@@ -20,9 +20,9 @@ import {
   FormMessage,
 } from "../ui/form";
 import { Input } from "../ui/input";
-import { Button } from "../ui/button"; 
 import { toast } from "sonner";
 import { UploadCloud } from "lucide-react";
+import { Button } from "../button";
 
 // Schéma Zod pour la validation
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
@@ -71,7 +71,7 @@ export const UploadAttachmentDialog = ({
     resolver: zodResolver(uploadAttachmentSchema),
     defaultValues: {
       customName: "",
-      file: undefined, 
+      file: undefined,
     },
   });
 
@@ -81,7 +81,7 @@ export const UploadAttachmentDialog = ({
   const onSubmit = async (data: UploadAttachmentFormData) => {
     setIsUploading(true);
     try {
-      const file = data.file[0]; 
+      const file = data.file[0];
       const customName = data.customName;
 
       await onUpload(file, customName);
@@ -120,7 +120,7 @@ export const UploadAttachmentDialog = ({
                     <Input
                       type="file"
                       placeholder="Choisir un fichier"
-                      {...fileRef} 
+                      {...fileRef}
                       onChange={(e) => {
                         fileRef.onChange(e);
 
@@ -148,7 +148,7 @@ export const UploadAttachmentDialog = ({
                   <FormLabel>Nom personnalisé du fichier</FormLabel>
                   <FormControl>
                     <Input
-                      placeholder="Ex: Facture_Janvier_2024.pdf"
+                      placeholder="Ex: Mon_Fichier.pdf"
                       {...field}
                     />
                   </FormControl>

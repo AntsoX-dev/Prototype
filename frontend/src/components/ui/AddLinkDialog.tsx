@@ -9,7 +9,7 @@ import {
   DialogTitle,
   DialogFooter,
   DialogDescription,
-} from "./dialog"; 
+} from "./dialog";
 import {
   Form,
   FormControl,
@@ -17,11 +17,11 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "../ui/form"; 
+} from "../ui/form";
 import { Input } from "../ui/input";
-import { Button } from "../ui/button";
+import { Button } from "../button";
 import { toast } from "sonner";
-import { Link } from "lucide-react"; 
+import { Link } from "lucide-react";
 
 const addLinkSchema = z.object({
   customName: z.string().min(3, "Le nom doit contenir au moins 3 caractères."),
@@ -91,7 +91,7 @@ export const AddLinkDialog = ({
                   <FormControl>
                     <Input
                       placeholder="https://votre-lien.com"
-                      type="url" 
+                      type="url"
                       {...field}
                     />
                   </FormControl>

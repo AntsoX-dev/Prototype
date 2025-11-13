@@ -5,56 +5,56 @@ import { validateRequest } from "zod-express-middleware";
 import { taskSchema } from "../libs/validate_schema.js";
 import uploadAttachment from "../middleware/upload-attachment.js";
 import {
-  achievedTask,
-  addComment,
-  addSubTask,
-  createTask,
-  getActivityByResourceId,
-  getCommentsByTaskId,
-  getMyTasks,
-  getTaskById,
-  updateSubTask,
-  updateTaskAssignees,
-  updateTaskDescription,
-  updateTaskPriority,
-  updateTaskStatus,
-  updateTaskTitle,
-  watchTask,
-  addAttachmentToTask,
-  addLinkToTask,
+    achievedTask,
+    addComment,
+    addSubTask,
+    createTask,
+    getActivityByResourceId,
+    getCommentsByTaskId,
+    getMyTasks,
+    getTaskById,
+    updateSubTask,
+    updateTaskAssignees,
+    updateTaskDescription,
+    updateTaskPriority,
+    updateTaskStatus,
+    updateTaskTitle,
+    watchTask,
+    addAttachmentToTask,
+    addLinkToTask,
 } from "../controllers/task.js";
 import authMiddleware from "../middleware/auth-middleware.js";
 
 const router = express.Router();
 
 router.post(
-  "/:taskId/add-file-attachment", 
-  authMiddleware,
-  uploadAttachment,
-  validateRequest({
-    params: z.object({
-      taskId: z.string(),
+    "/:taskId/add-file-attachment",
+    authMiddleware,
+    uploadAttachment,
+    validateRequest({
+        params: z.object({
+            taskId: z.string(),
+        }),
+        body: z.object({
+            customName: z.string().min(3),
+        }),
     }),
-    body: z.object({
-      customName: z.string().min(3),
-    }),
-  }),
-  addAttachmentToTask 
+    addAttachmentToTask
 );
 
 router.post(
-  "/:taskId/add-link-attachment", 
-  authMiddleware,
-  validateRequest({
-    params: z.object({
-      taskId: z.string(),
+    "/:taskId/add-link-attachment",
+    authMiddleware,
+    validateRequest({
+        params: z.object({
+            taskId: z.string(),
+        }),
+        body: z.object({
+            customName: z.string().min(3),
+            fileUrl: z.string().url(),
+        }),
     }),
-    body: z.object({
-      customName: z.string().min(3),
-      fileUrl: z.string().url(), 
-    }),
-  }),
-  addLinkToTask 
+    addLinkToTask
 );
 
 router.post(
