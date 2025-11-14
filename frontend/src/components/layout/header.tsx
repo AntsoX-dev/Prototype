@@ -58,7 +58,6 @@ export const Header = ({
     if (!utilisateur) return;
     try {
       const response = await fetchData<{ data: Notification[] }>(
-        // Point de terminaison correct pour GET /notifications
         "/notifications"
       );
       const loadedNotifications = response.data || [];
@@ -66,7 +65,6 @@ export const Header = ({
       setNotifications(loadedNotifications);
       setHasUnread(loadedNotifications.some((n) => !n.lu));
     } catch (error) {
-      // Le 404 est géré ici. S'il y a un 404, les notifications sont vides.
       console.error("Erreur lors du chargement des notifications:", error);
       setNotifications([]);
       setHasUnread(false);
