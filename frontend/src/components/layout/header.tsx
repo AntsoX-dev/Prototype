@@ -182,14 +182,14 @@ export const Header = ({
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
 
-              {/* {notifications.length > 0 && (
+              {notifications.length > 0 && (
                 <DropdownMenuItem
                   onClick={handleMarkAllRead}
                   className="cursor-pointer text-sm text-blue-600 justify-end hover:bg-gray-50 focus:bg-gray-50"
                 >
                   <CheckCircle className="w-3 h-3 mr-1" /> Marquer tout comme lu
                 </DropdownMenuItem>
-              )} */}
+              )}
               <DropdownMenuSeparator />
 
               <DropdownMenuGroup>
