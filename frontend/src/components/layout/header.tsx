@@ -167,29 +167,34 @@ export const Header = ({
           >
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon" className="relative">
-                <Bell />
+                <Bell className="text-gray-700 hover:text-primary-500 transition-colors duration-200" />
                 {hasUnread && (
-                  <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-red-500 ring-2 ring-background" />
+                  <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-red-500 ring-2 ring-white" />
                 )}
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent
               align="end"
-              className="w-80 max-h-96 overflow-y-auto"
+              className="w-80 max-h-96 overflow-y-auto bg-white shadow-lg rounded-lg p-2 transition-all duration-300 ease-in-out"
             >
-              <DropdownMenuLabel className="font-semibold text-lg">
-                Notifications
-              </DropdownMenuLabel>
-              <DropdownMenuSeparator />
+              {/* Titre centré et bouton sans position fixed */}
+              <div className="py-2 px-4">
+                {/* Titre centré */}
+                <DropdownMenuLabel className="font-semibold text-lg text-gray-800 text-center mb-2">
+                  Notifications
+                </DropdownMenuLabel>
 
-              {notifications.length > 0 && (
-                <DropdownMenuItem
-                  onClick={handleMarkAllRead}
-                  className="cursor-pointer text-sm text-blue-600 justify-end hover:bg-gray-50 focus:bg-gray-50"
-                >
-                  <CheckCircle className="w-3 h-3 mr-1" /> Marquer tout comme lu
-                </DropdownMenuItem>
-              )}
+                {/* Bouton "Marquer tout comme lu" */}
+                {notifications.length > 0 && (
+                  <DropdownMenuItem
+                    onClick={handleMarkAllRead}
+                    className="cursor-pointer text-sm text-[#005F73] justify-center transition-colors duration-200 ease-in-out hover:bg-[#0060731f] focus:bg-[#0060731f] text-center py-2"
+                  >
+                    <CheckCircle className="w-3 h-3 mr-2 text-[#005F73]" /> Marquer tout comme lu
+                  </DropdownMenuItem>
+                )}
+              </div>
+
               <DropdownMenuSeparator />
 
               <DropdownMenuGroup>
@@ -197,20 +202,25 @@ export const Header = ({
                   notifications.slice(0, 10).map((n) => (
                     <DropdownMenuItem
                       key={n._id}
-                      className={`flex flex-col items-start h-auto py-2 px-3 whitespace-normal ${!n.lu ? "bg-blue-50/50 hover:bg-blue-100/50" : ""
+                      className={`flex items-start h-auto py-3 px-4 mb-2 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105 ${!n.lu
+                        ? "bg-[#00607315] hover:bg-blue-100 border-l-4 border-[#005F73]"
+                        : "bg-gray-50 text-gray-500"
                         }`}
                     >
-                      <p className="text-sm font-medium leading-tight">
-                        {n.message}
-                      </p>
-                      <span
-                        className={`text-xs mt-1 ${!n.lu
-                          ? "text-blue-700 font-semibold"
-                          : "text-gray-500"
-                          }`}
-                      >
-                        {formatTimeAgo(n.date_reception)}
-                      </span>
+                      {/* Icône plus petite */}
+                      <div className="flex-shrink-0 mt-0.5">
+                        <Bell className={`w-4 h-4 ${!n.lu ? 'text-[#005F73]' : 'text-gray-400'}`} />
+                      </div>
+
+                      {/* Contenu du message */}
+                      <div className="ml-3 flex flex-col space-y-1 w-full">
+                        <p className="text-sm font-medium leading-tight text-gray-700">{n.message}</p>
+                        <span
+                          className={`text-xs ${!n.lu ? "text-[#005F73] font-semibold" : "text-gray-400"}`}
+                        >
+                          {formatTimeAgo(n.date_reception)}
+                        </span>
+                      </div>
                     </DropdownMenuItem>
                   ))
                 ) : (
@@ -224,6 +234,9 @@ export const Header = ({
               </DropdownMenuGroup>
             </DropdownMenuContent>
           </DropdownMenu>
+
+
+
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
