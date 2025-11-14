@@ -68,8 +68,8 @@ const postFormData = async <T>(
   return response.data;
 };
 const patchData = async <T>(path: string): Promise<T> => {
-  const response = await api.patch(path, null);
-  return response.data;
+    const response = await api.patch(path); 
+    return response.data;
 };
 
 const updateFormData = async <T>(

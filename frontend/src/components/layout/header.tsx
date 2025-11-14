@@ -58,7 +58,6 @@ export const Header = ({
     if (!utilisateur) return;
     try {
       const response = await fetchData<{ data: Notification[] }>(
-        // Point de terminaison correct pour GET /notifications
         "/notifications"
       );
       const loadedNotifications = response.data || [];
@@ -66,7 +65,6 @@ export const Header = ({
       setNotifications(loadedNotifications);
       setHasUnread(loadedNotifications.some((n) => !n.lu));
     } catch (error) {
-      // Le 404 est géré ici. S'il y a un 404, les notifications sont vides.
       console.error("Erreur lors du chargement des notifications:", error);
       setNotifications([]);
       setHasUnread(false);
@@ -186,7 +184,6 @@ export const Header = ({
 
               {notifications.length > 0 && (
                 <DropdownMenuItem
-                  // L'utilisation de fetchData est maintenant confirmée
                   onClick={handleMarkAllRead}
                   className="cursor-pointer text-sm text-blue-600 justify-end hover:bg-gray-50 focus:bg-gray-50"
                 >
