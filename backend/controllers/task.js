@@ -6,9 +6,7 @@ import Task from "../models/task.js";
 import Workspace from "../models/workspace.js";
 import { uploadFileToCloudinary } from "../libs/cloudinary.js";
 
-/* ================================
-   🔹 Helpers de gestion de rôles 🔹
-   ================================ */
+/* Helpers de gestion de rôles*/
 
 const isProjectMember = (project, userId) =>
     project.members.some((m) => m.user.toString() === userId.toString());
@@ -37,9 +35,7 @@ const canManageTask = (workspace, project, userId) => {
     return false;
 };
 
-/* =============================
-   🔸 TES CONTROLLERS COMPLETS 🔸
-   ============================= */
+/* CONTROLLERS COMPLETS */
 
 const createTask = async (req, res) => {
     try {
@@ -291,7 +287,6 @@ const addSubTask = async (req, res) => {
     }
 };
 
-// ⬇️ (toutes les autres fonctions restent inchangées mais gardent le contrôle d’accès)
 const updateSubTask = async (req, res) => {
     try {
         const { taskId, subTaskId } = req.params;
@@ -369,7 +364,7 @@ const addComment = async (req, res) => {
         const project = await Project.findById(task.project);
         const workspace = await Workspace.findById(project.workspace);
 
-        // 💬 Même les "viewers" peuvent commenter, donc juste vérifier la présence
+        // Même les "viewers" peuvent commenter, donc juste vérifier la présence
         const isMember =
             isProjectMember(project, req.user._id) ||
             isWorkspaceMember(workspace, req.user._id);
@@ -641,9 +636,6 @@ const addLinkToTask = async (req, res) => {
     }
 };
 
-/* =================================
-   🔸 EXPORT FINAL DE TOUS LES FONCTIONS 🔸
-   ================================= */
 export {
     createTask,
     getTaskById,
