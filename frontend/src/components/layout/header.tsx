@@ -184,7 +184,7 @@ export const Header = ({
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
 
-              {/* {notifications.length > 0 && (
+              {notifications.length > 0 && (
                 <DropdownMenuItem
                   // L'utilisation de fetchData est maintenant confirmée
                   onClick={handleMarkAllRead}
@@ -192,7 +192,7 @@ export const Header = ({
                 >
                   <CheckCircle className="w-3 h-3 mr-1" /> Marquer tout comme lu
                 </DropdownMenuItem>
-              )} */}
+              )}
               <DropdownMenuSeparator />
 
               <DropdownMenuGroup>
@@ -200,19 +200,17 @@ export const Header = ({
                   notifications.slice(0, 10).map((n) => (
                     <DropdownMenuItem
                       key={n._id}
-                      className={`flex flex-col items-start h-auto py-2 px-3 whitespace-normal ${
-                        !n.lu ? "bg-blue-50/50 hover:bg-blue-100/50" : ""
-                      }`}
+                      className={`flex flex-col items-start h-auto py-2 px-3 whitespace-normal ${!n.lu ? "bg-blue-50/50 hover:bg-blue-100/50" : ""
+                        }`}
                     >
                       <p className="text-sm font-medium leading-tight">
                         {n.message}
                       </p>
                       <span
-                        className={`text-xs mt-1 ${
-                          !n.lu
-                            ? "text-blue-700 font-semibold"
-                            : "text-gray-500"
-                        }`}
+                        className={`text-xs mt-1 ${!n.lu
+                          ? "text-blue-700 font-semibold"
+                          : "text-gray-500"
+                          }`}
                       >
                         {formatTimeAgo(n.date_reception)}
                       </span>
