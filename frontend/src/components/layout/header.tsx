@@ -186,7 +186,6 @@ export const Header = ({
 
               {/* {notifications.length > 0 && (
                 <DropdownMenuItem
-                  // L'utilisation de fetchData est maintenant confirmée
                   onClick={handleMarkAllRead}
                   className="cursor-pointer text-sm text-blue-600 justify-end hover:bg-gray-50 focus:bg-gray-50"
                 >
