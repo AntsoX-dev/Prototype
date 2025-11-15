@@ -1,4 +1,4 @@
-import Notification from "../models/notification.js"; 
+import Notification from "../models/notification.js";
 class NotificationController {
   // Méthode pour supprimer une notification
   static async deleteNotification(req, res) {
@@ -23,8 +23,8 @@ class NotificationController {
       const message = `La notification avec l'identifiant ${id} n'a pas pu être supprimée. Réessayez dans quelques instants.`;
       res.status(500).json({ message, data: error });
     }
-    }
-    // Méthode pour récupérer toutes les notifications d'un utilisateur
+  }
+  // Méthode pour récupérer toutes les notifications d'un utilisateur
 
   static async getUserNotifications(req, res) {
     const UtilisateurId = req.user.id;
@@ -39,8 +39,8 @@ class NotificationController {
       const message = `La liste des notifications n'a pas pu être récupérée. Réessayez dans quelques instants.`;
       res.status(500).json({ message, data: error });
     }
-    }
-    // Méthode pour vérifier si un utilisateur a au moins une notification non lue
+  }
+  // Méthode pour vérifier si un utilisateur a au moins une notification non lue
   static async avoirNotificationNonLu(req, res) {
     const UtilisateurId = req.user.id;
     try {

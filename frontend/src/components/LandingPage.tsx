@@ -8,6 +8,11 @@ import {
   ClipboardCheck,
   Cog,
   ExternalLink,
+  Chromium,
+  Component,
+  Crosshair,
+  ShipWheel,
+  LocateFixed,
 } from "lucide-react";
 
 interface FeatureCardProps {
@@ -36,7 +41,7 @@ const LandingPage = () => {
             className="text-2xl font-bold text-[#005F73] flex items-center gap-2 group"
           >
             <div className="p-2 bg-[#005F73] text-white rounded-lg transition-transform duration-500 ">
-              <Cog
+              <LocateFixed
                 size={20}
                 className="group-hover:rotate-180 duration-1000 group-hover:scale-150"
               />

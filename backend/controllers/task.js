@@ -160,6 +160,26 @@ const updateTaskTitle = async (req, res) => {
         task.title = title;
         await task.save();
 
+        // Notification pour assignees et watchers
+        const notificationPromises = [
+            ...task.assignees.map(async (assigneeId) => {
+                const message = `Le titre de la tâche "${oldTitle}" a été mis à jour en "${title}".`;
+                return NotificationController.addNotification({
+                    message,
+                    UtilisateurId: assigneeId,
+                });
+            }),
+            ...task.watchers.map(async (watcherId) => {
+                const message = `Le titre de la tâche "${oldTitle}" a été mis à jour en "${title}".`;
+                return NotificationController.addNotification({
+                    message,
+                    UtilisateurId: watcherId,
+                });
+            })
+        ];
+
+        await Promise.all(notificationPromises);
+
         await recordActivity(req.user._id, "updated_task", "Task", taskId, {
             description: `titre de la tâche mis à jour de ${oldTitle} à ${title}`,
         });
@@ -170,6 +190,7 @@ const updateTaskTitle = async (req, res) => {
         return res.status(500).json({ message: "Erreur interne du serveur" });
     }
 };
+
 
 const updateTaskDescription = async (req, res) => {
     try {
@@ -194,6 +215,26 @@ const updateTaskDescription = async (req, res) => {
         task.description = description;
         await task.save();
 
+        // Notification pour assignees et watchers
+        const notificationPromises = [
+            ...task.assignees.map(async (assigneeId) => {
+                const message = `La description de la tâche a été mise à jour de "${oldDescription}" à "${newDescription}".`;
+                return NotificationController.addNotification({
+                    message,
+                    UtilisateurId: assigneeId,
+                });
+            }),
+            ...task.watchers.map(async (watcherId) => {
+                const message = `La description de la tâche a été mise à jour de "${oldDescription}" à "${newDescription}".`;
+                return NotificationController.addNotification({
+                    message,
+                    UtilisateurId: watcherId,
+                });
+            })
+        ];
+
+        await Promise.all(notificationPromises);
+
         await recordActivity(req.user._id, "updated_task", "Task", taskId, {
             description: `description mise à jour de ${oldDescription} à ${newDescription}`,
         });
@@ -204,6 +245,7 @@ const updateTaskDescription = async (req, res) => {
         return res.status(500).json({ message: "Erreur interne du serveur" });
     }
 };
+
 
 const updateTaskStatus = async (req, res) => {
     try {
@@ -223,6 +265,26 @@ const updateTaskStatus = async (req, res) => {
         task.status = status;
         await task.save();
 
+        // Notification pour assignees et watchers
+        const notificationPromises = [
+            ...task.assignees.map(async (assigneeId) => {
+                const message = `Le statut de la tâche a été mis à jour de "${oldStatus}" à "${status}".`;
+                return NotificationController.addNotification({
+                    message,
+                    UtilisateurId: assigneeId,
+                });
+            }),
+            ...task.watchers.map(async (watcherId) => {
+                const message = `Le statut de la tâche a été mis à jour de "${oldStatus}" à "${status}".`;
+                return NotificationController.addNotification({
+                    message,
+                    UtilisateurId: watcherId,
+                });
+            })
+        ];
+
+        await Promise.all(notificationPromises);
+
         await recordActivity(req.user._id, "updated_task", "Task", taskId, {
             description: `statut mis à jour de ${oldStatus} à ${status}`,
         });
@@ -233,6 +295,7 @@ const updateTaskStatus = async (req, res) => {
         return res.status(500).json({ message: "Erreur interne du serveur" });
     }
 };
+
 
 const updateTaskAssignees = async (req, res) => {
     try {
@@ -252,6 +315,32 @@ const updateTaskAssignees = async (req, res) => {
         task.assignees = assignees;
         await task.save();
 
+        // Notification pour les utilisateurs ajoutés
+        const addedUsers = assignees.filter(
+            (userId) => !oldAssignees.includes(userId)
+        );
+        const removedUsers = oldAssignees.filter(
+            (userId) => !assignees.includes(userId)
+        );
+
+        const addedNotifications = addedUsers.map((userId) => {
+            const message = `Vous avez été ajouté en tant qu'assigné à la tâche "${task.title}".`;
+            return NotificationController.addNotification({
+                message,
+                UtilisateurId: userId,
+            });
+        });
+
+        const removedNotifications = removedUsers.map((userId) => {
+            const message = `Vous avez été retiré de la tâche "${task.title}".`;
+            return NotificationController.addNotification({
+                message,
+                UtilisateurId: userId,
+            });
+        });
+
+        await Promise.all([...addedNotifications, ...removedNotifications]);
+
         await recordActivity(req.user._id, "updated_task", "Task", taskId, {
             description: `assignés modifiés (${oldAssignees.length} → ${assignees.length})`,
         });
@@ -262,6 +351,7 @@ const updateTaskAssignees = async (req, res) => {
         return res.status(500).json({ message: "Erreur interne du serveur" });
     }
 };
+
 
 const updateTaskPriority = async (req, res) => {
     try {
@@ -280,6 +370,26 @@ const updateTaskPriority = async (req, res) => {
         const oldPriority = task.priority;
         task.priority = priority;
         await task.save();
+
+        // Notification pour assignees et watchers
+        const notificationPromises = [
+            ...task.assignees.map(async (assigneeId) => {
+                const message = `La priorité de la tâche a été mise à jour de "${oldPriority}" à "${priority}".`;
+                return NotificationController.addNotification({
+                    message,
+                    UtilisateurId: assigneeId,
+                });
+            }),
+            ...task.watchers.map(async (watcherId) => {
+                const message = `La priorité de la tâche a été mise à jour de "${oldPriority}" à "${priority}".`;
+                return NotificationController.addNotification({
+                    message,
+                    UtilisateurId: watcherId,
+                });
+            })
+        ];
+
+        await Promise.all(notificationPromises);
 
         await recordActivity(req.user._id, "updated_task", "Task", taskId, {
             description: `priorité mise à jour de ${oldPriority} à ${priority}`,
@@ -310,6 +420,26 @@ const addSubTask = async (req, res) => {
         task.subtasks.push(newSubTask);
         await task.save();
 
+        // Notification pour assignees et watchers
+        const notificationPromises = [
+            ...task.assignees.map(async (assigneeId) => {
+                const message = `Une nouvelle sous-tâche "${title}" a été ajoutée à la tâche "${task.title}".`;
+                return NotificationController.addNotification({
+                    message,
+                    UtilisateurId: assigneeId,
+                });
+            }),
+            ...task.watchers.map(async (watcherId) => {
+                const message = `Une nouvelle sous-tâche "${title}" a été ajoutée à la tâche "${task.title}".`;
+                return NotificationController.addNotification({
+                    message,
+                    UtilisateurId: watcherId,
+                });
+            })
+        ];
+
+        await Promise.all(notificationPromises);
+
         await recordActivity(req.user._id, "created_subtask", "Task", taskId, {
             description: `sous-tâche créée ${title}`,
         });
@@ -320,6 +450,7 @@ const addSubTask = async (req, res) => {
         return res.status(500).json({ message: "Erreur interne du serveur" });
     }
 };
+
 
 const updateSubTask = async (req, res) => {
     try {
@@ -341,8 +472,29 @@ const updateSubTask = async (req, res) => {
         if (!subTask)
             return res.status(404).json({ message: "Sous-tâche non trouvée" });
 
+        const oldStatus = subTask.completed;
         subTask.completed = completed;
         await task.save();
+
+        // Notification pour assignees et watchers
+        const notificationPromises = [
+            ...task.assignees.map(async (assigneeId) => {
+                const message = `Le statut de la sous-tâche "${subTask.title}" a été mis à jour : ${oldStatus ? "terminée" : "en cours"} → ${completed ? "terminée" : "en cours"}.`;
+                return NotificationController.addNotification({
+                    message,
+                    UtilisateurId: assigneeId,
+                });
+            }),
+            ...task.watchers.map(async (watcherId) => {
+                const message = `Le statut de la sous-tâche "${subTask.title}" a été mis à jour : ${oldStatus ? "terminée" : "en cours"} → ${completed ? "terminée" : "en cours"}.`;
+                return NotificationController.addNotification({
+                    message,
+                    UtilisateurId: watcherId,
+                });
+            })
+        ];
+
+        await Promise.all(notificationPromises);
 
         await recordActivity(req.user._id, "updated_subtask", "Task", taskId, {
             description: `sous-tâche mise à jour ${subTask.title}`,
@@ -354,6 +506,7 @@ const updateSubTask = async (req, res) => {
         return res.status(500).json({ message: "Erreur interne du serveur" });
     }
 };
+
 
 const getActivityByResourceId = async (req, res) => {
     try {
@@ -396,13 +549,11 @@ const addComment = async (req, res) => {
         const project = await Project.findById(task.project);
         const workspace = await Workspace.findById(project.workspace);
 
-        // Même les "viewers" peuvent commenter, donc juste vérifier la présence
         const isMember =
             isProjectMember(project, req.user._id) ||
             isWorkspaceMember(workspace, req.user._id);
         if (!isMember)
             return res.status(403).json({ message: "Vous n'êtes pas membre de ce projet" });
-
 
         const newComment = await Comment.create({
             text,
@@ -413,9 +564,28 @@ const addComment = async (req, res) => {
         task.comments.push(newComment._id);
         await task.save();
 
+        // Notification pour assignees et watchers
+        const notificationPromises = [
+            ...task.assignees.map(async (assigneeId) => {
+                const message = `Un nouveau commentaire a été ajouté à la tâche "${task.title}".`;
+                return NotificationController.addNotification({
+                    message,
+                    UtilisateurId: assigneeId,
+                });
+            }),
+            ...task.watchers.map(async (watcherId) => {
+                const message = `Un nouveau commentaire a été ajouté à la tâche "${task.title}".`;
+                return NotificationController.addNotification({
+                    message,
+                    UtilisateurId: watcherId,
+                });
+            })
+        ];
+
+        await Promise.all(notificationPromises);
+
         await recordActivity(req.user._id, "added_comment", "Task", taskId, {
-            description: `commentaire ajouté ${text.substring(0, 50) + (text.length > 50 ? "..." : "")
-                }`,
+            description: `commentaire ajouté ${text.substring(0, 50) + (text.length > 50 ? "..." : "")}`,
         });
 
         res.status(201).json(newComment);
@@ -424,6 +594,8 @@ const addComment = async (req, res) => {
         return res.status(500).json({ message: "Erreur interne du serveur" });
     }
 };
+
+
 
 const watchTask = async (req, res) => {
     try {
@@ -452,9 +624,27 @@ const watchTask = async (req, res) => {
 
         await task.save();
 
+        // Notification pour les assignees et les watchers
+        const notificationMessage = `${isWatching ? "a arrêté de suivre" : "a commencé à suivre"} la tâche "${task.title}".`;
+        const notificationPromises = [
+            ...task.assignees.map(async (assigneeId) => {
+                return NotificationController.addNotification({
+                    message: notificationMessage,
+                    UtilisateurId: assigneeId,
+                });
+            }),
+            ...task.watchers.map(async (watcherId) => {
+                return NotificationController.addNotification({
+                    message: notificationMessage,
+                    UtilisateurId: watcherId,
+                });
+            })
+        ];
+
+        await Promise.all(notificationPromises);
+
         await recordActivity(req.user._id, "updated_task", "Task", taskId, {
-            description: `${isWatching ? "a arrêté de suivre" : "a commencé à suivre"
-                } la tâche ${task.title}`,
+            description: `${isWatching ? "a arrêté de suivre" : "a commencé à suivre"} la tâche ${task.title}`,
         });
 
         res.status(200).json(task);
@@ -463,6 +653,7 @@ const watchTask = async (req, res) => {
         return res.status(500).json({ message: "Erreur interne du serveur" });
     }
 };
+
 
 const achievedTask = async (req, res) => {
     try {
@@ -481,9 +672,28 @@ const achievedTask = async (req, res) => {
         task.isArchived = !isAchieved;
         await task.save();
 
+        // Notification pour assignees et watchers
+        const notificationPromises = [
+            ...task.assignees.map(async (assigneeId) => {
+                const message = `La tâche "${task.title}" a été marquée comme ${isAchieved ? "non terminée" : "terminée"}.`;
+                return NotificationController.addNotification({
+                    message,
+                    UtilisateurId: assigneeId,
+                });
+            }),
+            ...task.watchers.map(async (watcherId) => {
+                const message = `La tâche "${task.title}" a été marquée comme ${isAchieved ? "non terminée" : "terminée"}.`;
+                return NotificationController.addNotification({
+                    message,
+                    UtilisateurId: watcherId,
+                });
+            })
+        ];
+
+        await Promise.all(notificationPromises);
+
         await recordActivity(req.user._id, "updated_task", "Task", taskId, {
-            description: `${isAchieved ? "marqué comme non terminée" : "marqué comme terminée"
-                } la tâche ${task.title}`,
+            description: `${isAchieved ? "marqué comme non terminée" : "marqué comme terminée"} la tâche ${task.title}`,
         });
 
         res.status(200).json(task);
@@ -493,11 +703,25 @@ const achievedTask = async (req, res) => {
     }
 };
 
+
 const getMyTasks = async (req, res) => {
     try {
         const tasks = await Task.find({ assignees: { $in: [req.user._id] } })
             .populate("project", "title workspace")
             .sort({ createdAt: -1 });
+
+        // Notification pour chaque tâche assignée
+        tasks.forEach(async (task) => {
+            if (!task.notificationsSent) {
+                const message = `Vous avez été assigné à la tâche "${task.title}" dans le projet "${task.project.title}".`;
+                await NotificationController.addNotification({
+                    message,
+                    UtilisateurId: req.user._id,
+                });
+                task.notificationsSent = true; // Indicateur pour ne pas envoyer plusieurs fois la notification
+                await task.save();
+            }
+        });
 
         res.status(200).json(tasks);
     } catch (error) {
@@ -505,6 +729,7 @@ const getMyTasks = async (req, res) => {
         return res.status(500).json({ message: "Erreur interne du serveur" });
     }
 };
+
 
 const getTaskTrends = async (req, res) => {
     try {
@@ -551,6 +776,7 @@ const getTaskTrends = async (req, res) => {
         res.status(500).json({ message: "Erreur interne du serveur" });
     }
 };
+
 const addAttachmentToTask = async (req, res) => {
     try {
         const { taskId } = req.params;
@@ -579,6 +805,7 @@ const addAttachmentToTask = async (req, res) => {
         if (!project) {
             return res.status(404).json({ message: "Projet non trouvé" });
         }
+
         const isMember = project.members.some(
             (member) => member.user.toString() === req.user._id.toString()
         );
@@ -604,6 +831,25 @@ const addAttachmentToTask = async (req, res) => {
         task.attachments.push(newAttachment);
         await task.save();
 
+        // Notification pour assignees et watchers
+        const notificationMessage = `Une nouvelle pièce jointe "${customName}" a été ajoutée à la tâche "${task.title}".`;
+        const notificationPromises = [
+            ...task.assignees.map(async (assigneeId) => {
+                return NotificationController.addNotification({
+                    message: notificationMessage,
+                    UtilisateurId: assigneeId,
+                });
+            }),
+            ...task.watchers.map(async (watcherId) => {
+                return NotificationController.addNotification({
+                    message: notificationMessage,
+                    UtilisateurId: watcherId,
+                });
+            })
+        ];
+
+        await Promise.all(notificationPromises);
+
         await recordActivity(req.user._id, "added_attachment", "Task", taskId, {
             description: `a ajouté la pièce jointe : ${customName}`,
         });
@@ -617,6 +863,7 @@ const addAttachmentToTask = async (req, res) => {
         return res.status(500).json({ message: "Erreur interne du serveur" });
     }
 };
+
 
 const addLinkToTask = async (req, res) => {
     try {

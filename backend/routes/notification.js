@@ -1,8 +1,8 @@
 import express from "express";
 import { z } from "zod";
 import { validateRequest } from "zod-express-middleware";
-import authMiddleware from "../middleware/auth-middleware.js"; 
-import { NotificationController } from "../controllers/notification.js"; 
+import authMiddleware from "../middleware/auth-middleware.js";
+import { NotificationController } from "../controllers/notification.js";
 
 const router = express.Router();
 
@@ -21,7 +21,7 @@ router.get("/", authMiddleware, NotificationController.getUserNotifications);
 router.get(
   "/unread/:id",
   authMiddleware,
-  validateRequest({ params: idParamSchema }), 
+  validateRequest({ params: idParamSchema }),
   NotificationController.avoirNotificationNonLu
 );
 

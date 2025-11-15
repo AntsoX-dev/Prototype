@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import type { Workspace } from "../../types";
 import { useAuth } from "../../fournisseur/auth-context";
 import { Button } from "../button";
-import { Bell, PlusCircle, CheckCircle } from "lucide-react";
+import { PlusCircle, CheckCircle, Trash2, BellDot, Bell } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -14,7 +14,8 @@ import { Avatar, AvatarImage, AvatarFallback } from "../ui/avatar";
 import { DropdownMenuItem, DropdownMenuSeparator } from "../ui/dropdown-menu";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { WorkspaceAvatar } from "../workspace/workspace-avatar";
-import { fetchData, patchData } from "../../libs/fetch-utils";
+import { deleteData, fetchData, patchData } from "../../libs/fetch-utils";
+import { toast } from "sonner";
 
 interface Notification {
   _id: string;
@@ -109,6 +110,19 @@ export const Header = ({
     return `${Math.floor(diffInSeconds / 86400)}j`;
   };
 
+  const handleDeleteNotification = async (id: string) => {
+    try {
+      await deleteData(`/notifications/${id}`);
+      setNotifications((prevNotifications) =>
+        prevNotifications.filter((notification) => notification._id !== id)
+      );
+      toast.success("Notification supprimée avec succès !");
+    } catch (error) {
+      console.error("Erreur lors de la suppression de la notification:", error);
+      toast.error("Erreur lors de la suppression de la notification.");
+    }
+  };
+
   return (
     <div className="bg-background sticky top-0 z-40 border-b">
       <div className="flex h-14 items-center justify-between px-4 sm:px-6 lg:px-8 py-4">
@@ -168,8 +182,13 @@ export const Header = ({
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon" className="relative">
                 <Bell className="text-gray-700 hover:text-primary-500 transition-colors duration-200" />
-                {hasUnread && (
-                  <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-red-500 ring-2 ring-white" />
+                {notifications.filter(n => !n.lu).length > 0 && (
+                  <span className="absolute top-0 right-0 w-4 h-4 text-xs text-white font-semibold flex items-center justify-center rounded-full bg-red-500">
+                    {/* Afficher le nombre de notifications non lues, ou +9 si le nombre dépasse 9 */}
+                    {notifications.filter(n => !n.lu).length > 9
+                      ? '+9'
+                      : notifications.filter(n => !n.lu).length}
+                  </span>
                 )}
               </Button>
             </DropdownMenuTrigger>
@@ -177,9 +196,7 @@ export const Header = ({
               align="end"
               className="w-80 max-h-96 overflow-y-auto bg-white shadow-lg rounded-lg p-2 transition-all duration-300 ease-in-out"
             >
-              {/* Titre centré et bouton sans position fixed */}
               <div className="py-2 px-4">
-                {/* Titre centré */}
                 <DropdownMenuLabel className="font-semibold text-lg text-gray-800 text-center mb-2">
                   Notifications
                 </DropdownMenuLabel>
@@ -209,7 +226,7 @@ export const Header = ({
                     >
                       {/* Icône plus petite */}
                       <div className="flex-shrink-0 mt-0.5">
-                        <Bell className={`w-4 h-4 ${!n.lu ? 'text-[#005F73]' : 'text-gray-400'}`} />
+                        <BellDot className={`w-4 h-4 ${!n.lu ? 'text-[#005F73]' : 'text-gray-400'}`} />
                       </div>
 
                       {/* Contenu du message */}
@@ -221,6 +238,14 @@ export const Header = ({
                           {formatTimeAgo(n.date_reception)}
                         </span>
                       </div>
+                      {/* Icône de suppression */}
+                      <button
+                        onClick={() => handleDeleteNotification(n._id)}
+                        className="ml-2 text-red-500 hover:text-red-700 transition-colors duration-200"
+                        aria-label="Supprimer la notification"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
                     </DropdownMenuItem>
                   ))
                 ) : (
@@ -234,6 +259,11 @@ export const Header = ({
               </DropdownMenuGroup>
             </DropdownMenuContent>
           </DropdownMenu>
+
+
+
+
+
 
 
 
