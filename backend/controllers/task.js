@@ -4,11 +4,10 @@ import Comment from "../models/comment.js";
 import Project from "../models/project.js";
 import Task from "../models/task.js";
 import Workspace from "../models/workspace.js";
+import { NotificationController } from "./notification.js";
 import { uploadFileToCloudinary } from "../libs/cloudinary.js";
 
-/* ================================
-   🔹 Helpers de gestion de rôles 🔹
-   ================================ */
+/* Helpers de gestion de rôles*/
 
 const isProjectMember = (project, userId) =>
     project.members.some((m) => m.user.toString() === userId.toString());
@@ -17,12 +16,16 @@ const isWorkspaceMember = (workspace, userId) =>
     workspace.members.some((m) => m.user.toString() === userId.toString());
 
 const getProjectRole = (project, userId) => {
-    const m = project.members.find((m) => m.user.toString() === userId.toString());
+    const m = project.members.find(
+        (m) => m.user.toString() === userId.toString()
+    );
     return m ? m.role : null;
 };
 
 const getWorkspaceRole = (workspace, userId) => {
-    const m = workspace.members.find((m) => m.user.toString() === userId.toString());
+    const m = workspace.members.find(
+        (m) => m.user.toString() === userId.toString()
+    );
     return m ? m.role : null;
 };
 
@@ -37,18 +40,16 @@ const canManageTask = (workspace, project, userId) => {
     return false;
 };
 
-/* =============================
-   🔸 TES CONTROLLERS COMPLETS 🔸
-   ============================= */
+/* CONTROLLERS COMPLETS */
 
 const createTask = async (req, res) => {
     try {
         const { projectId } = req.params;
-        const { title, description, status, priority, dueDate, assignees } = req.body;
+        const { title, description, status, priority, dueDate, assignees } =
+            req.body;
 
         const project = await Project.findById(projectId);
-        if (!project)
-            return res.status(404).json({ message: "Projet non trouvé" });
+        if (!project) return res.status(404).json({ message: "Projet non trouvé" });
 
         const workspace = await Workspace.findById(project.workspace);
         if (!workspace)
@@ -56,11 +57,15 @@ const createTask = async (req, res) => {
 
         const isMember = isWorkspaceMember(workspace, req.user._id);
         if (!isMember)
-            return res.status(403).json({ message: "Vous n'êtes pas membre de cet espace de travail" });
+            return res
+                .status(403)
+                .json({ message: "Vous n'êtes pas membre de cet espace de travail" });
 
         // 🔒 Vérifie si l'utilisateur peut créer
         if (!canManageTask(workspace, project, req.user._id))
-            return res.status(403).json({ message: "Vous n'avez pas les droits pour créer une tâche." });
+            return res
+                .status(403)
+                .json({ message: "Vous n'avez pas les droits pour créer une tâche." });
 
         const newTask = await Task.create({
             title,
@@ -68,14 +73,39 @@ const createTask = async (req, res) => {
             status,
             priority,
             dueDate,
-            assignees,
+            assignees, // Tableau d'id ny assignées eto
             project: projectId,
             createdBy: req.user._id,
         });
 
         project.tasks.push(newTask._id);
-        await project.save();
+        await project.save(); // Juste après la création de la tâche, on crée la notification
 
+        // ETO NO MANAO AJOUT DES NOTIFICATIONS POUR TOUS LES ASSIGNÉS
+
+        //   Eto possible tsy utilisateur ray ihany no assigné de tsy maintsy manao itération
+        if (assignees && assignees.length > 0) {
+            //👈👈 eto no manomboka le itération
+            const notificationPromises = assignees.map(async (assigneeId) => {
+                // Mappage du tableau assignees
+                const message = `Vous avez été assigné à la nouvelle tâche : "${newTask.title}" dans le projet "${project.title}".`; //Le message de notification
+                // Service pour la création de notification (situé dans le controller)
+                return NotificationController.addNotification({
+                    message: message,
+                    UtilisateurId: assigneeId, // ID de l'utilisateur assigné
+                });
+            });
+
+            // Exécute toutes les créations de notifications en parallèle
+            await Promise.all(notificationPromises); //Ito no antsoina hoe promesse
+
+            // 🚨🚨🚨 raha utilisateur ray ihany no notifier-na de io fotsiny
+            //   NotificationController.addNotification({
+            //     message: "le message",
+            //     UtilisateurId: "Id de l'utilisateur",
+
+            // TOUJOURS APRES L'OPERATION PRINCIPALE ZAY VAO ASIANA ANLE AJOUT DE NOTIFICATION
+        }
         res.status(201).json(newTask);
     } catch (error) {
         console.log(error);
@@ -91,9 +121,9 @@ const getTaskById = async (req, res) => {
             .populate("assignees", "name profil")
             .populate("watchers", "name profil");
 
-        if (!task)
-            return res.status(404).json({ message: "Tâche non trouvée" });
+        if (!task) return res.status(404).json({ message: "Tâche non trouvée" });
 
+<<<<<<< HEAD
         const project = await Project.findById(task.project)
             .populate("members.user", "name profil")
             .populate({
@@ -112,6 +142,18 @@ const getTaskById = async (req, res) => {
         if (!isWorkspaceMember(workspace, req.user._id) &&
             !isProjectMember(project, req.user._id) &&
             !isAssigned)
+=======
+        const project = await Project.findById(task.project).populate(
+            "members.user",
+            "name profil"
+        );
+        const workspace = await Workspace.findById(project.workspace);
+
+        if (
+            !isWorkspaceMember(workspace, req.user._id) &&
+            !isProjectMember(project, req.user._id)
+        )
+>>>>>>> 353d6b6f63c9c7a3e38abd67528cf0d6c6ede019
             return res.status(403).json({ message: "Accès refusé à cette tâche." });
 
         res.status(200).json({ task, project });
@@ -129,8 +171,7 @@ const updateTaskTitle = async (req, res) => {
         const { title } = req.body;
 
         const task = await Task.findById(taskId);
-        if (!task)
-            return res.status(404).json({ message: "Tâche non trouvée" });
+        if (!task) return res.status(404).json({ message: "Tâche non trouvée" });
 
         const project = await Project.findById(task.project);
         const workspace = await Workspace.findById(project.workspace);
@@ -141,6 +182,26 @@ const updateTaskTitle = async (req, res) => {
         const oldTitle = task.title;
         task.title = title;
         await task.save();
+
+        // Notification pour assignees et watchers
+        const notificationPromises = [
+            ...task.assignees.map(async (assigneeId) => {
+                const message = `Le titre de la tâche "${oldTitle}" a été mis à jour en "${title}".`;
+                return NotificationController.addNotification({
+                    message,
+                    UtilisateurId: assigneeId,
+                });
+            }),
+            ...task.watchers.map(async (watcherId) => {
+                const message = `Le titre de la tâche "${oldTitle}" a été mis à jour en "${title}".`;
+                return NotificationController.addNotification({
+                    message,
+                    UtilisateurId: watcherId,
+                });
+            })
+        ];
+
+        await Promise.all(notificationPromises);
 
         await recordActivity(req.user._id, "updated_task", "Task", taskId, {
             description: `titre de la tâche mis à jour de ${oldTitle} à ${title}`,
@@ -153,14 +214,14 @@ const updateTaskTitle = async (req, res) => {
     }
 };
 
+
 const updateTaskDescription = async (req, res) => {
     try {
         const { taskId } = req.params;
         const { description } = req.body;
 
         const task = await Task.findById(taskId);
-        if (!task)
-            return res.status(404).json({ message: "Tâche non trouvée" });
+        if (!task) return res.status(404).json({ message: "Tâche non trouvée" });
 
         const project = await Project.findById(task.project);
         const workspace = await Workspace.findById(project.workspace);
@@ -169,12 +230,33 @@ const updateTaskDescription = async (req, res) => {
             return res.status(403).json({ message: "Action non autorisée." });
 
         const oldDescription =
-            task.description.substring(0, 50) + (task.description.length > 50 ? "..." : "");
+            task.description.substring(0, 50) +
+            (task.description.length > 50 ? "..." : "");
         const newDescription =
             description.substring(0, 50) + (description.length > 50 ? "..." : "");
 
         task.description = description;
         await task.save();
+
+        // Notification pour assignees et watchers
+        const notificationPromises = [
+            ...task.assignees.map(async (assigneeId) => {
+                const message = `La description de la tâche a été mise à jour de "${oldDescription}" à "${newDescription}".`;
+                return NotificationController.addNotification({
+                    message,
+                    UtilisateurId: assigneeId,
+                });
+            }),
+            ...task.watchers.map(async (watcherId) => {
+                const message = `La description de la tâche a été mise à jour de "${oldDescription}" à "${newDescription}".`;
+                return NotificationController.addNotification({
+                    message,
+                    UtilisateurId: watcherId,
+                });
+            })
+        ];
+
+        await Promise.all(notificationPromises);
 
         await recordActivity(req.user._id, "updated_task", "Task", taskId, {
             description: `description mise à jour de ${oldDescription} à ${newDescription}`,
@@ -187,14 +269,14 @@ const updateTaskDescription = async (req, res) => {
     }
 };
 
+
 const updateTaskStatus = async (req, res) => {
     try {
         const { taskId } = req.params;
         const { status } = req.body;
 
         const task = await Task.findById(taskId);
-        if (!task)
-            return res.status(404).json({ message: "Tâche non trouvée" });
+        if (!task) return res.status(404).json({ message: "Tâche non trouvée" });
 
         const project = await Project.findById(task.project);
         const workspace = await Workspace.findById(project.workspace);
@@ -205,6 +287,26 @@ const updateTaskStatus = async (req, res) => {
         const oldStatus = task.status;
         task.status = status;
         await task.save();
+
+        // Notification pour assignees et watchers
+        const notificationPromises = [
+            ...task.assignees.map(async (assigneeId) => {
+                const message = `Le statut de la tâche a été mis à jour de "${oldStatus}" à "${status}".`;
+                return NotificationController.addNotification({
+                    message,
+                    UtilisateurId: assigneeId,
+                });
+            }),
+            ...task.watchers.map(async (watcherId) => {
+                const message = `Le statut de la tâche a été mis à jour de "${oldStatus}" à "${status}".`;
+                return NotificationController.addNotification({
+                    message,
+                    UtilisateurId: watcherId,
+                });
+            })
+        ];
+
+        await Promise.all(notificationPromises);
 
         await recordActivity(req.user._id, "updated_task", "Task", taskId, {
             description: `statut mis à jour de ${oldStatus} à ${status}`,
@@ -217,14 +319,14 @@ const updateTaskStatus = async (req, res) => {
     }
 };
 
+
 const updateTaskAssignees = async (req, res) => {
     try {
         const { taskId } = req.params;
         const { assignees } = req.body;
 
         const task = await Task.findById(taskId);
-        if (!task)
-            return res.status(404).json({ message: "Tâche non trouvée" });
+        if (!task) return res.status(404).json({ message: "Tâche non trouvée" });
 
         const project = await Project.findById(task.project);
         const workspace = await Workspace.findById(project.workspace);
@@ -235,6 +337,32 @@ const updateTaskAssignees = async (req, res) => {
         const oldAssignees = task.assignees;
         task.assignees = assignees;
         await task.save();
+
+        // Notification pour les utilisateurs ajoutés
+        const addedUsers = assignees.filter(
+            (userId) => !oldAssignees.includes(userId)
+        );
+        const removedUsers = oldAssignees.filter(
+            (userId) => !assignees.includes(userId)
+        );
+
+        const addedNotifications = addedUsers.map((userId) => {
+            const message = `Vous avez été ajouté en tant qu'assigné à la tâche "${task.title}".`;
+            return NotificationController.addNotification({
+                message,
+                UtilisateurId: userId,
+            });
+        });
+
+        const removedNotifications = removedUsers.map((userId) => {
+            const message = `Vous avez été retiré de la tâche "${task.title}".`;
+            return NotificationController.addNotification({
+                message,
+                UtilisateurId: userId,
+            });
+        });
+
+        await Promise.all([...addedNotifications, ...removedNotifications]);
 
         await recordActivity(req.user._id, "updated_task", "Task", taskId, {
             description: `assignés modifiés (${oldAssignees.length} → ${assignees.length})`,
@@ -247,14 +375,14 @@ const updateTaskAssignees = async (req, res) => {
     }
 };
 
+
 const updateTaskPriority = async (req, res) => {
     try {
         const { taskId } = req.params;
         const { priority } = req.body;
 
         const task = await Task.findById(taskId);
-        if (!task)
-            return res.status(404).json({ message: "Tâche non trouvée" });
+        if (!task) return res.status(404).json({ message: "Tâche non trouvée" });
 
         const project = await Project.findById(task.project);
         const workspace = await Workspace.findById(project.workspace);
@@ -265,6 +393,26 @@ const updateTaskPriority = async (req, res) => {
         const oldPriority = task.priority;
         task.priority = priority;
         await task.save();
+
+        // Notification pour assignees et watchers
+        const notificationPromises = [
+            ...task.assignees.map(async (assigneeId) => {
+                const message = `La priorité de la tâche a été mise à jour de "${oldPriority}" à "${priority}".`;
+                return NotificationController.addNotification({
+                    message,
+                    UtilisateurId: assigneeId,
+                });
+            }),
+            ...task.watchers.map(async (watcherId) => {
+                const message = `La priorité de la tâche a été mise à jour de "${oldPriority}" à "${priority}".`;
+                return NotificationController.addNotification({
+                    message,
+                    UtilisateurId: watcherId,
+                });
+            })
+        ];
+
+        await Promise.all(notificationPromises);
 
         await recordActivity(req.user._id, "updated_task", "Task", taskId, {
             description: `priorité mise à jour de ${oldPriority} à ${priority}`,
@@ -283,8 +431,7 @@ const addSubTask = async (req, res) => {
         const { title } = req.body;
 
         const task = await Task.findById(taskId);
-        if (!task)
-            return res.status(404).json({ message: "Tâche non trouvée" });
+        if (!task) return res.status(404).json({ message: "Tâche non trouvée" });
 
         const project = await Project.findById(task.project);
         const workspace = await Workspace.findById(project.workspace);
@@ -295,6 +442,26 @@ const addSubTask = async (req, res) => {
         const newSubTask = { title, completed: false };
         task.subtasks.push(newSubTask);
         await task.save();
+
+        // Notification pour assignees et watchers
+        const notificationPromises = [
+            ...task.assignees.map(async (assigneeId) => {
+                const message = `Une nouvelle sous-tâche "${title}" a été ajoutée à la tâche "${task.title}".`;
+                return NotificationController.addNotification({
+                    message,
+                    UtilisateurId: assigneeId,
+                });
+            }),
+            ...task.watchers.map(async (watcherId) => {
+                const message = `Une nouvelle sous-tâche "${title}" a été ajoutée à la tâche "${task.title}".`;
+                return NotificationController.addNotification({
+                    message,
+                    UtilisateurId: watcherId,
+                });
+            })
+        ];
+
+        await Promise.all(notificationPromises);
 
         await recordActivity(req.user._id, "created_subtask", "Task", taskId, {
             description: `sous-tâche créée ${title}`,
@@ -307,15 +474,14 @@ const addSubTask = async (req, res) => {
     }
 };
 
-// ⬇️ (toutes les autres fonctions restent inchangées mais gardent le contrôle d’accès)
+
 const updateSubTask = async (req, res) => {
     try {
         const { taskId, subTaskId } = req.params;
         const { completed } = req.body;
 
         const task = await Task.findById(taskId);
-        if (!task)
-            return res.status(404).json({ message: "Tâche non trouvée" });
+        if (!task) return res.status(404).json({ message: "Tâche non trouvée" });
 
         const project = await Project.findById(task.project);
         const workspace = await Workspace.findById(project.workspace);
@@ -329,8 +495,29 @@ const updateSubTask = async (req, res) => {
         if (!subTask)
             return res.status(404).json({ message: "Sous-tâche non trouvée" });
 
+        const oldStatus = subTask.completed;
         subTask.completed = completed;
         await task.save();
+
+        // Notification pour assignees et watchers
+        const notificationPromises = [
+            ...task.assignees.map(async (assigneeId) => {
+                const message = `Le statut de la sous-tâche "${subTask.title}" a été mis à jour : ${oldStatus ? "terminée" : "en cours"} → ${completed ? "terminée" : "en cours"}.`;
+                return NotificationController.addNotification({
+                    message,
+                    UtilisateurId: assigneeId,
+                });
+            }),
+            ...task.watchers.map(async (watcherId) => {
+                const message = `Le statut de la sous-tâche "${subTask.title}" a été mis à jour : ${oldStatus ? "terminée" : "en cours"} → ${completed ? "terminée" : "en cours"}.`;
+                return NotificationController.addNotification({
+                    message,
+                    UtilisateurId: watcherId,
+                });
+            })
+        ];
+
+        await Promise.all(notificationPromises);
 
         await recordActivity(req.user._id, "updated_subtask", "Task", taskId, {
             description: `sous-tâche mise à jour ${subTask.title}`,
@@ -342,6 +529,7 @@ const updateSubTask = async (req, res) => {
         return res.status(500).json({ message: "Erreur interne du serveur" });
     }
 };
+
 
 const getActivityByResourceId = async (req, res) => {
     try {
@@ -379,13 +567,11 @@ const addComment = async (req, res) => {
         const { text } = req.body;
 
         const task = await Task.findById(taskId);
-        if (!task)
-            return res.status(404).json({ message: "Tâche non trouvée" });
+        if (!task) return res.status(404).json({ message: "Tâche non trouvée" });
 
         const project = await Project.findById(task.project);
         const workspace = await Workspace.findById(project.workspace);
 
-        // 💬 Même les "viewers" peuvent commenter, donc juste vérifier la présence
         const isMember =
             isProjectMember(project, req.user._id) ||
             isWorkspaceMember(workspace, req.user._id);
@@ -401,6 +587,26 @@ const addComment = async (req, res) => {
         task.comments.push(newComment._id);
         await task.save();
 
+        // Notification pour assignees et watchers
+        const notificationPromises = [
+            ...task.assignees.map(async (assigneeId) => {
+                const message = `Un nouveau commentaire a été ajouté à la tâche "${task.title}".`;
+                return NotificationController.addNotification({
+                    message,
+                    UtilisateurId: assigneeId,
+                });
+            }),
+            ...task.watchers.map(async (watcherId) => {
+                const message = `Un nouveau commentaire a été ajouté à la tâche "${task.title}".`;
+                return NotificationController.addNotification({
+                    message,
+                    UtilisateurId: watcherId,
+                });
+            })
+        ];
+
+        await Promise.all(notificationPromises);
+
         await recordActivity(req.user._id, "added_comment", "Task", taskId, {
             description: `commentaire ajouté ${text.substring(0, 50) + (text.length > 50 ? "..." : "")}`,
         });
@@ -412,13 +618,14 @@ const addComment = async (req, res) => {
     }
 };
 
+
+
 const watchTask = async (req, res) => {
     try {
         const { taskId } = req.params;
 
         const task = await Task.findById(taskId);
-        if (!task)
-            return res.status(404).json({ message: "Tâche non trouvée" });
+        if (!task) return res.status(404).json({ message: "Tâche non trouvée" });
 
         const project = await Project.findById(task.project);
         const workspace = await Workspace.findById(project.workspace);
@@ -440,6 +647,25 @@ const watchTask = async (req, res) => {
 
         await task.save();
 
+        // Notification pour les assignees et les watchers
+        const notificationMessage = `${isWatching ? "a arrêté de suivre" : "a commencé à suivre"} la tâche "${task.title}".`;
+        const notificationPromises = [
+            ...task.assignees.map(async (assigneeId) => {
+                return NotificationController.addNotification({
+                    message: notificationMessage,
+                    UtilisateurId: assigneeId,
+                });
+            }),
+            ...task.watchers.map(async (watcherId) => {
+                return NotificationController.addNotification({
+                    message: notificationMessage,
+                    UtilisateurId: watcherId,
+                });
+            })
+        ];
+
+        await Promise.all(notificationPromises);
+
         await recordActivity(req.user._id, "updated_task", "Task", taskId, {
             description: `${isWatching ? "a arrêté de suivre" : "a commencé à suivre"} la tâche ${task.title}`,
         });
@@ -451,13 +677,13 @@ const watchTask = async (req, res) => {
     }
 };
 
+
 const achievedTask = async (req, res) => {
     try {
         const { taskId } = req.params;
 
         const task = await Task.findById(taskId);
-        if (!task)
-            return res.status(404).json({ message: "Tâche non trouvée" });
+        if (!task) return res.status(404).json({ message: "Tâche non trouvée" });
 
         const project = await Project.findById(task.project);
         const workspace = await Workspace.findById(project.workspace);
@@ -469,6 +695,26 @@ const achievedTask = async (req, res) => {
         task.isArchived = !isAchieved;
         await task.save();
 
+        // Notification pour assignees et watchers
+        const notificationPromises = [
+            ...task.assignees.map(async (assigneeId) => {
+                const message = `La tâche "${task.title}" a été marquée comme ${isAchieved ? "non terminée" : "terminée"}.`;
+                return NotificationController.addNotification({
+                    message,
+                    UtilisateurId: assigneeId,
+                });
+            }),
+            ...task.watchers.map(async (watcherId) => {
+                const message = `La tâche "${task.title}" a été marquée comme ${isAchieved ? "non terminée" : "terminée"}.`;
+                return NotificationController.addNotification({
+                    message,
+                    UtilisateurId: watcherId,
+                });
+            })
+        ];
+
+        await Promise.all(notificationPromises);
+
         await recordActivity(req.user._id, "updated_task", "Task", taskId, {
             description: `${isAchieved ? "marqué comme non terminée" : "marqué comme terminée"} la tâche ${task.title}`,
         });
@@ -479,6 +725,7 @@ const achievedTask = async (req, res) => {
         return res.status(500).json({ message: "Erreur interne du serveur" });
     }
 };
+
 
 const getMyTasks = async (req, res) => {
     try {
@@ -492,12 +739,29 @@ const getMyTasks = async (req, res) => {
             })
             .sort({ createdAt: -1 });
 
+<<<<<<< HEAD
         // ❗ Filtrer les taches où le workspace a été supprimé
         const filteredTasks = tasks.filter(t =>
             t.project && t.project.workspace
         );
 
         res.status(200).json(filteredTasks);
+=======
+        // Notification pour chaque tâche assignée
+        tasks.forEach(async (task) => {
+            if (!task.notificationsSent) {
+                const message = `Vous avez été assigné à la tâche "${task.title}" dans le projet "${task.project.title}".`;
+                await NotificationController.addNotification({
+                    message,
+                    UtilisateurId: req.user._id,
+                });
+                task.notificationsSent = true; // Indicateur pour ne pas envoyer plusieurs fois la notification
+                await task.save();
+            }
+        });
+
+        res.status(200).json(tasks);
+>>>>>>> 353d6b6f63c9c7a3e38abd67528cf0d6c6ede019
     } catch (error) {
         console.log(error);
         return res.status(500).json({ message: "Erreur interne du serveur" });
@@ -550,6 +814,7 @@ const getTaskTrends = async (req, res) => {
         res.status(500).json({ message: "Erreur interne du serveur" });
     }
 };
+
 const addAttachmentToTask = async (req, res) => {
     try {
         const { taskId } = req.params;
@@ -578,6 +843,7 @@ const addAttachmentToTask = async (req, res) => {
         if (!project) {
             return res.status(404).json({ message: "Projet non trouvé" });
         }
+
         const isMember = project.members.some(
             (member) => member.user.toString() === req.user._id.toString()
         );
@@ -603,6 +869,25 @@ const addAttachmentToTask = async (req, res) => {
         task.attachments.push(newAttachment);
         await task.save();
 
+        // Notification pour assignees et watchers
+        const notificationMessage = `Une nouvelle pièce jointe "${customName}" a été ajoutée à la tâche "${task.title}".`;
+        const notificationPromises = [
+            ...task.assignees.map(async (assigneeId) => {
+                return NotificationController.addNotification({
+                    message: notificationMessage,
+                    UtilisateurId: assigneeId,
+                });
+            }),
+            ...task.watchers.map(async (watcherId) => {
+                return NotificationController.addNotification({
+                    message: notificationMessage,
+                    UtilisateurId: watcherId,
+                });
+            })
+        ];
+
+        await Promise.all(notificationPromises);
+
         await recordActivity(req.user._id, "added_attachment", "Task", taskId, {
             description: `a ajouté la pièce jointe : ${customName}`,
         });
@@ -616,6 +901,7 @@ const addAttachmentToTask = async (req, res) => {
         return res.status(500).json({ message: "Erreur interne du serveur" });
     }
 };
+
 
 const addLinkToTask = async (req, res) => {
     try {
@@ -669,6 +955,7 @@ const addLinkToTask = async (req, res) => {
     }
 };
 
+<<<<<<< HEAD
 
 // suppression d'une tache 
 const deleteTask = async (req, res) => {
@@ -721,6 +1008,8 @@ const deleteTask = async (req, res) => {
 /* 
    🔸 EXPORT FINAL DE TOUS LES FONCTIONS 🔸
  */
+=======
+>>>>>>> 353d6b6f63c9c7a3e38abd67528cf0d6c6ede019
 export {
     createTask,
     getTaskById,
