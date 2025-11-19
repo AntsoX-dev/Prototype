@@ -706,22 +706,33 @@ const achievedTask = async (req, res) => {
 
 const getMyTasks = async (req, res) => {
     try {
-        const tasks = await Task.find({ assignees: { $in: [req.user._id] } })
+        const tasks = await Task.find({
+            assignees: { $in: [req.user._id] },
+        })
             .populate("project", "title workspace")
             .sort({ createdAt: -1 });
 
         // Notification pour chaque tâche assignée
-        tasks.forEach(async (task) => {
+        for (const task of tasks) {
+            // ⚠️ Sécurité : si le projet n’existe plus (projet supprimé ou corrompu)
+            if (!task.project) {
+                console.warn(`Task ${task._id} has no project. Skipping notification.`);
+                continue;
+            }
+
             if (!task.notificationsSent) {
                 const message = `Vous avez été assigné à la tâche "${task.title}" dans le projet "${task.project.title}".`;
+
                 await NotificationController.addNotification({
                     message,
                     UtilisateurId: req.user._id,
                 });
-                task.notificationsSent = true; // Indicateur pour ne pas envoyer plusieurs fois la notification
+
+                // Marquer comme notifié
+                task.notificationsSent = true;
                 await task.save();
             }
-        });
+        }
 
         res.status(200).json(tasks);
     } catch (error) {
@@ -729,6 +740,7 @@ const getMyTasks = async (req, res) => {
         return res.status(500).json({ message: "Erreur interne du serveur" });
     }
 };
+
 
 
 const getTaskTrends = async (req, res) => {
