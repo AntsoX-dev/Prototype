@@ -22,6 +22,7 @@ import {
     watchTask,
     addAttachmentToTask,
     addLinkToTask,
+    deleteTask,
 } from "../controllers/task.js";
 import authMiddleware from "../middleware/auth-middleware.js";
 
@@ -99,14 +100,13 @@ router.post(
 );
 
 router.post(
-    "/:taskId/achieved",
-    authMiddleware,
-    validateRequest({
-        params: z.object({ taskId: z.string() }),
-    }),
-    achievedTask
+  "/:taskId/achieved",
+  authMiddleware,
+  validateRequest({
+    params: z.object({ taskId: z.string() }),
+  }),
+  achievedTask
 );
-
 router.put(
     "/:taskId/update-subtask/:subTaskId",
     authMiddleware,
@@ -197,4 +197,15 @@ router.get(
     }),
     getCommentsByTaskId
 );
+
+//delete task
+router.delete(
+  "/:taskId/delete",
+  authMiddleware,
+  validateRequest({
+    params: z.object({ taskId: z.string() }),
+  }),
+  deleteTask
+);
+
 export default router;

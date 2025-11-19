@@ -15,6 +15,9 @@ import { BackButton } from "../../components/back-button";
 import { CreateTaskDialog } from "../../components/task/create-task-dialog";
 import { Badge } from "../../components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../components/ui/tabs";
+import { Cog } from "lucide-react";
+
+
 
 const statusLabels: Record<TaskStatus, string> = {
     "To Do": "À Faire",
@@ -46,7 +49,12 @@ const ProjectDetails = () => {
     const navigate = useNavigate();
 
     const [isCreateTask, setIsCreateTask] = useState(false);
+
+        // ici
+    // const [isProjectSettingsOpen, setIsProjectSettingsOpen] = useState(false);
+
     const [taskFilter, setTaskFilter] = useState<TaskStatus | "All">("All");
+
 
     const { data, isLoading } = UseProjectQuery(projectId!) as {
         data: {
@@ -56,6 +64,8 @@ const ProjectDetails = () => {
         isLoading: boolean;
     };
 
+
+    // j'ai modifier ici 
     if (isLoading)
         return (
             <div>
@@ -63,8 +73,53 @@ const ProjectDetails = () => {
             </div>
         );
 
-    const { project, tasks } = data;
+    const project = data.project ?? data;
+
+//AJOUTER 
+// ================== RESOLVE USER ROLES =======================
+const storedUser = localStorage.getItem("user");
+let currentUserId = null;
+
+try {
+  if (storedUser) currentUserId = JSON.parse(storedUser)._id;
+} catch {}
+
+let projectRole = null;
+let workspaceRole = null;
+
+// ROLE PROJECT
+if (currentUserId) {
+  const member = project.members?.find((m) => {
+    const uid = typeof m.user === "string" ? m.user : m.user._id;
+    return uid === currentUserId;
+  });
+  projectRole = member?.role || null;
+}
+
+// ROLE WORKSPACE
+if (currentUserId && project.workspace?.members) {
+  const wsMember = project.workspace.members.find((m) => {
+    const uid = typeof m.user === "string" ? m.user : m.user._id;
+    return uid === currentUserId;
+  });
+  workspaceRole = wsMember?.role || null;
+}
+
+// RESPONSABLE = admin | owner | manager
+const isWorkspaceAdmin = ["owner", "admin"].includes((workspaceRole ?? "").toLowerCase());
+const isManager = projectRole === "manager";
+
+const canAccessSettings = isWorkspaceAdmin || isManager;
+
+
+
+
+    const tasks = data.tasks ?? [];
+
+    if (!project) return <Loader />;
+
     const projectProgress = getProjectProgress(tasks);
+
 
     const handleTaskClick = (taskId: string) => {
         navigate(`/dashboard/workspaces/${workspaceId}/projects/${projectId}/tasks/${taskId}`);
@@ -94,8 +149,25 @@ const ProjectDetails = () => {
                             {projectProgress}%
                         </span>
                     </div>
+<div className="flex items-center gap-2">
+  <Button onClick={() => setIsCreateTask(true)}>
+    Ajouter une tâche
+  </Button>
 
-                    <Button onClick={() => setIsCreateTask(true)}>Ajouter une tâche</Button>
+  {/* Bouton Paramètres — TOUJOURS VISIBLE */}
+  <Button
+    variant="ghost"
+    size="icon"
+    onClick={() =>
+      navigate(`/dashboard/workspaces/${workspaceId}/projects/${projectId}/setting`)
+    }
+    title="Paramètres du projet"
+    aria-label="Paramètres"
+    className="hover:bg-gray-100"
+  >
+    <Cog className="size-5" />
+  </Button>
+</div>
                 </div>
             </div>
 

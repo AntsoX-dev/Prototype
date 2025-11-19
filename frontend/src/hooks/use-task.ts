@@ -220,18 +220,15 @@ export const useWatchTaskMutation = () => {
 };
 
 export const useAchievedTaskMutation = () => {
-  const queryClient = useQueryClient();
-
+  const qc = useQueryClient();
   return useMutation({
-    mutationFn: (data: { taskId: string }) =>
-      postData(`/tasks/${data.taskId}/achieved`, {}),
-    onSuccess: (data: any) => {
-      queryClient.invalidateQueries({
-        queryKey: ["task", data._id],
-      });
-      queryClient.invalidateQueries({
-        queryKey: ["task-activity", data._id],
-      });
+    // signature: mutate({ taskId: string })
+    mutationFn: (data: { taskId: string }) => postData(`/tasks/${data.taskId}/achieved`, {}),
+    onSuccess: (res: any) => {
+      // invalidate lists to refresh UI
+      qc.invalidateQueries({ queryKey: ["my-tasks"] });
+      qc.invalidateQueries({ queryKey: ["archived-tasks"] });
+      qc.invalidateQueries({ queryKey: ["task", res?._id] });
     },
   });
 };
@@ -242,3 +239,38 @@ export const useGetMyTasksQuery = () => {
     queryFn: () => fetchData("/tasks/my-tasks"),
   });
 };
+
+export const useDeleteTaskMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (taskId: string) => {
+      const token = localStorage.getItem("token");
+      console.log("Token utilisé pour la suppression :", token);
+
+      const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:5000";
+
+      const response = await fetch(`${apiUrl}/tasks/${taskId}`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      console.log("Requête DELETE envoyée vers :", response.url);
+
+      if (!response.ok) {
+        console.error(" Erreur côté serveur :", await response.text());
+        throw new Error("Erreur de suppression");
+      }
+
+      return response.json();
+    },
+    onSuccess: () => {
+      console.log(" Mutation réussie : cache invalidé");
+      queryClient.invalidateQueries({ queryKey: ["my-tasks", "user"] });
+    },
+  });
+};
+

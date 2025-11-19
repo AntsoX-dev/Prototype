@@ -34,13 +34,13 @@ export const SidebarComponent = ({ currentWorkspace }: { currentWorkspace: Works
       icon: Users,
     },
     {
-      title: "Archivés",
-      href: "/dashboard/achieved",
+      title: "Archivé",
+      href: "/dashboard/archived?archived=true",
       icon: CheckCircle2,
     },
     {
       title: "Paramètres",
-      href: "/dashboard/settings",
+      href: currentWorkspace ? `/dashboard/workspaces/${currentWorkspace._id}/settings` : "#",
       icon: Settings,
     },
   ];

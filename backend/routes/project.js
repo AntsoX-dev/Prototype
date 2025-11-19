@@ -4,7 +4,7 @@ import { validateRequest } from "zod-express-middleware";
 import { projectSchema } from "../libs/validate_schema.js";
 import { z } from "zod";
 
-// ✅ nouveaux middlewares
+// nouveaux middlewares
 import { resolveWorkspaceRole } from "../middleware/resolveWorkspaceRole.js";
 import { checkWorkspaceRole } from "../middleware/checkRole.js";
 
@@ -12,6 +12,8 @@ import {
     createProject,
     getProjectDetails,
     getProjectTasks,
+    updateProject,
+    deleteProject
 } from "../controllers/project.js";
 
 const router = express.Router();
@@ -60,4 +62,40 @@ router.get(
     getProjectTasks
 );
 
+/**
+ *  Modifier un projet (OWNER / MANAGER / ADMIN / OWNER workspace)
+ */
+router.patch(
+    "/:projectId",
+    authMiddleware,
+    validateRequest({
+        params: z.object({ projectId: z.string() }),
+    }),
+    updateProject
+);
+
+/**
+ * Supprimer un projet (OWNER / MANAGER / ADMIN / OWNER workspace)
+ */
+router.delete(
+    "/:projectId",
+    authMiddleware,
+    validateRequest({
+        params: z.object({ projectId: z.string() }),
+    }),
+    deleteProject
+);
+
+
+router.put(
+    "/:projectId",
+    authMiddleware,
+    validateRequest({
+        params: z.object({ projectId: z.string() }),
+    }),
+    updateProject
+);
+
+
 export default router;
+
