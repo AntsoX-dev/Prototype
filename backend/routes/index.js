@@ -14,7 +14,11 @@ router.use("/authentification", authRoutes);
 router.use("/workspaces", workspaceRoutes);
 router.use("/projects", projectRoutes);
 router.use("/tasks", taskRoutes);
+<<<<<<< HEAD
+router.use("/users", userRoutes); 
+=======
 router.use("/users", userRoutes);
 router.use("/notifications", notificationRoutes);
+>>>>>>> 353d6b6f63c9c7a3e38abd67528cf0d6c6ede019
 
 export default router;

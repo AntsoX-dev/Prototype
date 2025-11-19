@@ -19,8 +19,10 @@ import {
   useWatchTaskMutation,
   useAddAttachmentMutation,
 } from "../../hooks/use-task";
+import { useDeleteTaskMutation } from "../../hooks/use-task";
+import { useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "../../fournisseur/auth-context";
-import type { Project, Task } from "../../types";
+import type { Project, Task, Utilisateur } from "../../types";
 import { format, formatDistanceToNow } from "date-fns";
 import { Eye, EyeOff, File, Link, Paperclip, Plus } from "lucide-react";
 import { useNavigate, useParams } from "react-router";
@@ -84,6 +86,11 @@ const TaskDetails = () => {
   const { mutate: watchTask, isPending: isWatching } = useWatchTaskMutation();
   const { mutate: achievedTask, isPending: isAchieved } =
     useAchievedTaskMutation();
+
+    //delete task 
+  const { mutate: deleteTask, isPending: isDeleting } = useDeleteTaskMutation();
+  const queryClient = useQueryClient();
+
 
   if (isLoading) {
     return (
@@ -191,6 +198,48 @@ const TaskDetails = () => {
     });
   };
 
+
+const handleDeleteTask = () => {
+  if (!data?.task) return;
+
+  const task = data.task;
+
+  // Vérification des droits
+  if (!canDelete) {
+    toast.error("Vous n'avez pas l'autorisation de supprimer cette tâche.");
+    return;
+  }
+
+  deleteTask(task._id, {
+    onSuccess: () => {
+      queryClient.removeQueries({ queryKey: ["task", task._id] });
+      queryClient.invalidateQueries({ queryKey: ["project", projectId] });
+      queryClient.invalidateQueries({ queryKey: ["my-tasks", "user"] });
+
+      toast.success("Tâche supprimée avec succès");
+
+      navigate(`/dashboard/workspaces/${workspaceId}/projects/${projectId}`, {
+        replace: true,
+      });
+    },
+    onError: () => {
+      toast.error("Erreur lors de la suppression de la tâche");
+    },
+  });
+};
+
+const workspaceRole =
+  project?.workspace &&
+  Array.isArray(project.workspace.members)
+    ? project.workspace.members.find((m) => m.user._id === utilisateur?._id)?.role
+    : null;
+
+const canDelete = workspaceRole === "owner" || workspaceRole === "admin";
+
+if (isLoading) return <Loader />;
+
+if (!project) return <div>Not found</div>;
+
   return (
     <div className="container mx-auto p-0 py-4 md:px-4">
       <div className="flex flex-col md:flex-row items-center justify-between mb-6">
@@ -270,15 +319,18 @@ const TaskDetails = () => {
 
               <div className="flex items-center gap-2 mt-4 md:mt-0">
                 <TaskStatusSelector status={task.status} taskId={task._id} />
+{canDelete && (
+  <Button
+    variant="destructive"
+    size="sm"
+    onClick={handleDeleteTask}
+    disabled={isDeleting}
+    className="w-full sm:w-auto mt-2 sm:mt-0"
+  >
+    {isDeleting ? "Suppression..." : "Supprimer la tâche"}
+  </Button>
+)}
 
-                <Button
-                  variant={"destructive"}
-                  size="sm"
-                  onClick={() => { }}
-                  className="hidden md:block"
-                >
-                  Supprimer la tâche
-                </Button>
               </div>
             </div>
 

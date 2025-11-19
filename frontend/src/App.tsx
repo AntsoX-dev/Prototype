@@ -15,7 +15,9 @@ import Members from "./dashboard/members";
 import WorkspaceInvite from "./dashboard/workspaces/workspace-invite";
 import UserLayout from "./user/user-layout";
 import UserProfile from "./user/profile";
-import LandingPage from './components/LandingPage'; // Assurez-vous que le chemin d'importation est correct
+import Settings from "./dashboard/workspaces/settings"; 
+import ProjectSettings from "./dashboard/project/setting"; 
+import LandingPage from './components/LandingPage'; // Assurez-vous que le chemin d'importation soit correct
 
 function App() {
   return (
@@ -32,11 +34,15 @@ function App() {
       <Route path="/dashboard" element={<DashboardLayout />}>
         <Route index element={<Dashboard />} />
         <Route path="my-tasks" element={<MyTasks />} />
+        <Route path="archived" element={<MyTasks />} />
         <Route path="workspaces" element={<Workspaces />} />
         <Route path="workspaces/:workspaceId" element={<WorkspaceDetails />} />
         <Route path="workspaces/:workspaceId/projects/:projectId" element={<ProjectDetails />} />
         <Route path="/dashboard/workspaces/:workspaceId/projects/:projectId/tasks/:taskId" element={<TaskDetails />} />
+        <Route path="workspaces/:workspaceId/settings" element={<Settings />} />
         <Route path="/dashboard/members" element={<Members />} />
+        <Route path="/dashboard/workspaces/:workspaceId/projects/:projectId/setting" element={<ProjectSettings />} />
+
       </Route>
 
       <Route path="/workspace-invite/:workspaceId" element={<WorkspaceInvite />} />

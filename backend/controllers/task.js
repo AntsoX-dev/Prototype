@@ -123,16 +123,25 @@ const getTaskById = async (req, res) => {
 
         if (!task) return res.status(404).json({ message: "Tâche non trouvée" });
 
-        const project = await Project.findById(task.project).populate(
-            "members.user",
-            "name profil"
-        );
-        const workspace = await Workspace.findById(project.workspace);
+        const project = await Project.findById(task.project)
+            .populate("members.user", "name profil")
+            .populate({
+                path: "workspace",
+                populate: {
+                    path: "members.user",
+                    select: "name profil"
+                }
+            });
 
-        if (
-            !isWorkspaceMember(workspace, req.user._id) &&
-            !isProjectMember(project, req.user._id)
-        )
+        const workspace = project.workspace;
+
+        const isAssigned = task.assignees.some(a => a._id.toString() === req.user._id.toString());
+
+        // ✅ Autoriser si workspace membre, projet membre ou assigneé à la tâche
+        if (!isWorkspaceMember(workspace, req.user._id) &&
+            !isProjectMember(project, req.user._id) &&
+            !isAssigned)
+
             return res.status(403).json({ message: "Accès refusé à cette tâche." });
 
         res.status(200).json({ task, project });
@@ -141,6 +150,8 @@ const getTaskById = async (req, res) => {
         return res.status(500).json({ message: "Erreur interne du serveur" });
     }
 };
+
+
 
 const updateTaskTitle = async (req, res) => {
     try {
@@ -706,11 +717,16 @@ const achievedTask = async (req, res) => {
 
 const getMyTasks = async (req, res) => {
     try {
-        const tasks = await Task.find({
-            assignees: { $in: [req.user._id] },
-        })
-            .populate("project", "title workspace")
+        const tasks = await Task.find({ assignees: { $in: [req.user._id] } })
+            .populate({
+                path: "project",
+                populate: {
+                    path: "workspace",
+                    select: "name members"
+                }
+            })
             .sort({ createdAt: -1 });
+
 
         // Notification pour chaque tâche assignée
         for (const task of tasks) {
@@ -735,6 +751,7 @@ const getMyTasks = async (req, res) => {
         }
 
         res.status(200).json(tasks);
+
     } catch (error) {
         console.log(error);
         return res.status(500).json({ message: "Erreur interne du serveur" });
@@ -869,7 +886,7 @@ const addAttachmentToTask = async (req, res) => {
         res.status(200).json(task);
     } catch (error) {
         console.log(error);
-        if (error.message.includes("Format non supporté")) {
+        if (error?.message?.includes("Format non supporté")) {
             return res.status(400).json({ message: error.message });
         }
         return res.status(500).json({ message: "Erreur interne du serveur" });
@@ -929,6 +946,58 @@ const addLinkToTask = async (req, res) => {
     }
 };
 
+
+// suppression d'une tache 
+const deleteTask = async (req, res) => {
+    try {
+        const { taskId } = req.params;
+
+        const task = await Task.findById(taskId);
+        if (!task) return res.status(404).json({ message: "Tâche non trouvée" });
+
+        const project = await Project.findById(task.project);
+        if (!project) return res.status(404).json({ message: "Projet non trouvé" });
+
+        const workspace = await Workspace.findById(project.workspace);
+        if (!workspace) return res.status(404).json({ message: "Workspace non trouvé" });
+
+        //  Vérifier le rôle dans le workspace
+        const userRole = workspace.members.find(
+            (m) => m.user.toString() === req.user._id.toString()
+        )?.role;
+
+        // Même logique que le FRONT
+        const canDelete = userRole === "admin" || userRole === "owner";
+
+        if (!canDelete) {
+            return res.status(403).json({
+                message: "Vous n'avez pas les autorisations pour supprimer cette tâche",
+            });
+        }
+
+        //  Supprimer la tâche
+        await Task.findByIdAndDelete(taskId);
+
+        project.tasks = project.tasks.filter(
+            (t) => t.toString() !== taskId.toString()
+        );
+        await project.save();
+
+        await recordActivity(req.user._id, "deleted_task", "Task", taskId, {
+            description: `Tâche supprimée : ${task.title}`,
+        });
+
+        return res.status(200).json({ message: "Tâche supprimée avec succès" });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ message: "Erreur interne du serveur" });
+    }
+};
+
+/* 
+   🔸 EXPORT FINAL DE TOUS LES FONCTIONS 🔸
+ */
+
 export {
     createTask,
     getTaskById,
@@ -948,4 +1017,5 @@ export {
     getTaskTrends,
     addAttachmentToTask,
     addLinkToTask,
+    deleteTask,
 };

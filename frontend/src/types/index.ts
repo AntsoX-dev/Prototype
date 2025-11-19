@@ -7,6 +7,9 @@ export interface Utilisateur {
   isEmailVerified: boolean;
   updated: Date;
   profil?: string;
+
+  //j'ai ajouter ceci
+  role?: "owner" | "admin" | "member" | "viewer";
 }
 
 export interface AuthContextType {
@@ -53,11 +56,17 @@ export interface Project {
   startDate: Date;
   dueDate: Date;
   progress: number;
+  currentUserId: string; // j'ai mis cela 
   tasks: Task[];
   members: {
     user: Utilisateur;
-    role: 'admin' | 'member' | 'owner' | 'viewer';
+   role: 'manager' | 'contributor' | 'viewer'; 
   }[];
+
+// j'ai ajoute ceci
+  createdBy: Utilisateur | string;
+  tags?: string[];
+
   createdAt: Date;
   updatedAt: Date;
   isArchived: boolean;

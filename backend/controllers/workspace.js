@@ -487,6 +487,89 @@ const acceptInviteByToken = async (req, res) => {
 };
 
 
+//SETTINGS
+
+export const updateWorkspace = async (req, res) => {
+  try {
+    const { workspaceId } = req.params;
+    const { name, description, color } = req.body;
+
+    const workspace = await Workspace.findById(workspaceId);
+    if (!workspace) return res.status(404).json({ message: "Espace introuvable" });
+
+    if (String(workspace.owner) !== String(req.user._id))
+      return res.status(403).json({ message: "Non autorisé à modifier cet espace." });
+
+    workspace.name = name ?? workspace.name;
+    workspace.description = description ?? workspace.description;
+    workspace.color = color ?? workspace.color;
+
+    await workspace.save();
+    res.status(200).json({ message: "Espace mis à jour avec succès", workspace });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Erreur lors de la mise à jour du workspace" });
+  }
+};
+
+
+
+export const deleteWorkspace = async (req, res) => {
+  try {
+    const { workspaceId } = req.params;
+
+    const workspace = await Workspace.findById(workspaceId);
+    if (!workspace) return res.status(404).json({ message: "Espace introuvable" });
+
+    if (String(workspace.owner) !== String(req.user._id))
+      return res.status(403).json({ message: "Non autorisé à supprimer cet espace." });
+
+    await Workspace.findByIdAndDelete(workspaceId);
+
+    res.status(200).json({ message: "Espace supprimé avec succès" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Erreur lors de la suppression du workspace" });
+  }
+};
+
+
+
+
+export const transferWorkspace = async (req, res) => {
+  try {
+    const { workspaceId } = req.params;
+    const { newOwnerId } = req.body;
+
+    const workspace = await Workspace.findById(workspaceId).populate("members.user");
+    if (!workspace) return res.status(404).json({ message: "Espace introuvable" });
+
+    if (String(workspace.owner) !== String(req.user._id))
+      return res.status(403).json({ message: "Non autorisé à transférer cet espace." });
+
+    const member = workspace.members.find(
+      (m) => String(m.user._id) === String(newOwnerId)
+    );
+    if (!member) return res.status(400).json({ message: "L'utilisateur n'est pas membre" });
+
+    // Effectuer le transfert
+    workspace.owner = newOwnerId;
+    workspace.members = workspace.members.map((m) => {
+      if (String(m.user._id) === String(newOwnerId))
+        return { ...m.toObject(), role: "owner" };
+      if (String(m.user._id) === String(req.user._id))
+        return { ...m.toObject(), role: "admin" };
+      return m;
+    });
+
+    await workspace.save();
+    res.status(200).json({ message: "Transfert effectué avec succès", workspace });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Erreur lors du transfert du workspace" });
+  }
+};
+
 export {
   createWorkspace,
   getWorkspaces,

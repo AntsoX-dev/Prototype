@@ -61,3 +61,30 @@ export const useAcceptGenerateInviteMutation = () => {
             postData(`/workspaces/${workspaceId}/accept-generate-invite`, {}),
     });
 };
+
+
+// SETTINGS
+import { updateData, deleteData } from "../libs/fetch-utils";
+
+export const useUpdateWorkspaceMutation = () => {
+  return useMutation({
+    mutationFn: (data: { workspaceId: string; payload: any }) =>
+      updateData(`/workspaces/${data.workspaceId}`, data.payload),
+  });
+};
+
+export const useTransferWorkspaceMutation = () => {
+  return useMutation({
+    mutationFn: (data: { workspaceId: string; newOwnerId: string }) =>
+      updateData(`/workspaces/${data.workspaceId}/transfer`, {
+        newOwnerId: data.newOwnerId,
+      }),
+  });
+};
+
+export const useDeleteWorkspaceMutation = () => {
+  return useMutation({
+    mutationFn: (workspaceId: string) =>
+      deleteData(`/workspaces/${workspaceId}`),
+  });
+};
